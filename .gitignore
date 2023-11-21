@@ -1,5 +1,10 @@
 manual/200.conf
 azure/*
+
+# letsencrypt 임시 폴더 및 로그
+cert/letsencrypt
+certbot.log
+
 # 인증서 파일
 *.pem
 *.crt
@@ -10,4 +15,6 @@ azure/*
 *.p7b
 *.p7c
 
+# 인증 필수 정정 값
 .secret
+

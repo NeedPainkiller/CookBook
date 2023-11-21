@@ -23,11 +23,22 @@
 
 ## 로컬 장비 Git 에 GPG 키 적용
 - Github 에 등록한 GPG 키의 "Key ID" 를 복사
-```bash
+
+```powershell
+# Windows
 git config --global gpg.program "C:\Program Files (x86)\GnuPG\bin\gpg.exe"
 git config --global user.email kam6512@gmail.com
 git config --global user.name "YoungWon Kang"
 git config --global user.signingkey {Key ID}
 git config --global commit.gpgsign true
-git config --global gpg.program gpg
+git config --global -l
+```
+
+```bash
+# WSL
+sudo apt update
+sudo apt-get install gnupg
+git config --global gpg.program gpg2
+gpg2 --list-keys --keyid-format LONG
+gpg --edit-key {Key ID}
 ```

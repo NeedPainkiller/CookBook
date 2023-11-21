@@ -31,6 +31,18 @@
 ![IAM 사용자 KEY 발급 2](_readme/aws-iam-4.png)
 ![IAM 사용자 KEY 발급 3](_readme/aws-iam-5.png)
 
+
+## 설정파일 수정
+- .secret 파일 생성
+```
+DOMAIN=*.aaa.bbb
+ADMIN_EMAIL=yourmail@mail.com
+SECRET_AWS_ROUTE53_KEY={AWS IAM AccessKey}
+SECRET_AWS_ROUTE53_SECRET={AWS IAM SecretAccessKey}
+```
+- 파일 내 도메인, letsencrypt 에 등록될 이메일, AWS IAM 에서 발급한 AccessKey, SecretAccessKey
+- 해당 파일은 [.gitignore](/.gitignore) 에 등록되어 있음
+
 # How to auto-renew ssl certs
 
 Update the following infomation of `gencerts.sh` 
