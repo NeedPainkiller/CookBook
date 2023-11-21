@@ -1,0 +1,13 @@
+manual/200.conf
+azure/*
+# 인증서 파일
+*.pem
+*.crt
+*.key
+*.p12
+*.pfx
+*.cer
+*.p7b
+*.p7c
+
+.secret
