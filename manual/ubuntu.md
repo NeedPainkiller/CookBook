@@ -8,6 +8,7 @@ grep . /etc/*-release
 ## 패키지 업데이트
 ```bash
 sudo apt update -y
+sudo apt list --upgradable
 sudo apt upgrade -y
 
 # 필수 패키지
@@ -40,7 +41,7 @@ sudo netplan generate
 ###
 # This is the network config written by 'subiquity'
 network:
-  version: 
+  version: 2
   renderer: networkd
   ethernets:
     ens18:
