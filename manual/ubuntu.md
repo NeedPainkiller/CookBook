@@ -18,6 +18,53 @@ sudo apt install -y openssh-server curl wget net-tools tree language-pack-ko mak
 ```bash
 ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime && echo Asia/Seoul > /etc/timezone
 ```
+## IP 설정 변경
+```bash
+# 네트워크 어댑터 확인 > 이더넷 또는 무선랜의 인터페이스 명 확인 (ex:ens120)
+ifconfig 
+ls /sys/class/net
+ip link
+ip addr
+ip route
+
+# yaml 파일은 ensxxx 의 xxx 값을 구분할 것
+sudo vi /etc/netplan/01-network-manager-all.yaml
+# or
+sudo vi /etc/netplan/01-netcfg.yaml
+
+# netplan 없을 경우
+sudo netplan generate
+```
+
+```yaml
+###
+# This is the network config written by 'subiquity'
+network:
+  version: 
+  renderer: networkd
+  ethernets:
+    ens18:
+      dhcp4: no
+      dhcp6: no
+      addresses:
+        - 192.168.0.12/24
+      nameservers:
+        addresses: [1.1.1.1, 8.8.8.8]
+      routes:
+        - to: default
+          via: 192.168.0.1
+###
+```
+
+```bash
+# 설정 업데이트
+sudo netplan apply 
+
+# IP 확인
+ip addr
+ip route
+nslookup google.com
+```
 
 ## SSH 포트 변경 (ufw)
 ```bash
