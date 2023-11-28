@@ -12,7 +12,7 @@ sudo apt list --upgradable
 sudo apt upgrade -y
 
 # 필수 패키지
-sudo apt install -y openssh-server curl wget net-tools tree language-pack-ko make gcc pkg-config ca-certificates gnupg gnome-terminal lsb-release apt-transport-https 
+sudo apt install -y openssh-server curl wget net-tools tree language-pack-ko make gcc pkg-config ca-certificates gnupg ufw gnome-terminal lsb-release apt-transport-https 
 ```
 
 ## timezone 변경
@@ -168,6 +168,8 @@ groups 사용자ID
 # 3. [/bin/su] 명령어 그룹 및 권한 변경
 chown root:wheel /bin/su
 chmod 4750 /bin/su
+
+# 4. 이후 로컬에서 root 비밀번호 재설정
 ```
 
 
@@ -186,7 +188,7 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 
 sudo usermod -aG docker ${USER}
 
-sudo curl -L "https://github.com/docker/compose/releases/download/2.17.2/dockercompose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
 sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
