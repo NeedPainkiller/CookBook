@@ -11,7 +11,7 @@ sudo apt update -y
 sudo apt upgrade -y
 
 # 필수 패키지
-sudo apt install -y openssh-server curl wget net-tools tree language-pack-ko make gcc pkg-config ca-certificates curl gnupg gnome-terminal lsb-release apt-transport-https lsb-release
+sudo apt install -y openssh-server curl wget net-tools tree language-pack-ko make gcc pkg-config ca-certificates gnupg gnome-terminal lsb-release apt-transport-https 
 ```
 
 ## timezone 변경
@@ -64,6 +64,19 @@ sudo netplan apply
 ip addr
 ip route
 nslookup google.com
+
+
+##
+## Network connection을 기다라지 않기 위해 아래와 같이 
+## systemd-networkd-wait-online.service 서비스를 비활성화한다.
+##
+systemctl disable systemd-networkd-wait-online.service
+
+##
+## 다른 서비스에 의해서 systemd-networkd-wait-online.service 서비스가 활성화되는 것을 막기 위해
+## 아래와 같이 systemd-networkd-wait-online.service 서비스를 masking한다.
+##
+systemctl mask systemd-networkd-wait-online.service
 ```
 
 ## SSH 포트 변경 (ufw)
