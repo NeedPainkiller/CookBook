@@ -17,7 +17,16 @@ sudo apt install -y openssh-server curl wget net-tools tree language-pack-ko mak
 
 ## timezone 변경
 ```bash
-ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime && echo Asia/Seoul > /etc/timezone
+# date & timezone 확인
+date
+timedatectl
+
+# timezone 변경
+sudo timedatectl list-timezones | grep seoul
+sudo timedatectl set-timezone Asia/Seoul
+
+# or
+sudo ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime && echo Asia/Seoul > /etc/timezone
 ```
 ## IP 설정 변경
 ```bash
@@ -188,7 +197,7 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 
 sudo usermod -aG docker ${USER}
 
-sudo curl -L "https://github.com/docker/compose/releases/download/2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
 sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
