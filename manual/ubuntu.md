@@ -148,7 +148,6 @@ chmod 644 ~/.ssh/known_hosts
 ## nobody 계정생성
 ```bash
 sudo adduser nobody
-
 ```
 
 ### su 제한
@@ -181,6 +180,11 @@ chmod 4750 /bin/su
 # 4. 이후 로컬에서 root 비밀번호 재설정
 ```
 
+## 재부팅
+```bash
+sudo reboot now
+```
+
 
 # Docker 설치
 ```bash
@@ -201,25 +205,4 @@ sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker
 
 sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
-```
-
-
-### windows ssh pem permision
-```cmd
-icacls.exe xxx.pem /reset
-icacls.exe xxx.pem /grant:r %username%:(R)
-icacls.exe xxx.pem /inheritance:r
-```
-
-
-## pyenv
-```bash
-sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev
-
-git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-​
-echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
-echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
-echo 'eval "$(pyenv init -)"' >> ~/.bash_profile
-source ~/.bash_profile
 ```
