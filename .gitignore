@@ -17,7 +17,7 @@ out/
 ### VS Code ###
 .vscode/
 
-manual/200.conf
+etc/200.conf
 azure/*
 
 # letsencrypt 임시 폴더 및 로그
