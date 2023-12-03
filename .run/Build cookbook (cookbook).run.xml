@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Build cookbook (cookbook)" type="StardustRunConfiguration" factoryName="save-as-zip">
+    <option name="folderPath" value="$PROJECT_DIR$" />
+    <option name="instanceId" value="cookbook" />
+    <option name="instanceName" value="cookbook" />
+    <method v="2" />
+  </configuration>
+</component>
