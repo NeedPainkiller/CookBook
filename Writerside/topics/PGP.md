@@ -1,7 +1,5 @@
-# PGP 설정 및 활용
-
+# PGP
 ## PGP 설치 {id="pgp_1"}
-
 <tabs>
     <tab title="Windows">
         <a href="https://gpg4win.org/download.html">kleopatra 설치</a>
@@ -68,8 +66,8 @@
     <tab title="Windows">
         <code-block lang="shell">
             git config --global gpg.program "C:\Program Files (x86)\GnuPG\bin\gpg.exe"
-            git config --global user.email kam6512@gmail.com
-            git config --global user.name "YoungWon Kang"
+            git config --global user.email your_email@example.com
+            git config --global user.name "your_name"
             git config --global user.signingkey {Key ID}
             git config --global commit.gpgsign true
             git config --global -l
@@ -77,8 +75,8 @@
     </tab>
     <tab title="Linux (WSL)">
         <code-block lang="bash">
-            git config --global user.email kam6512@gmail.com
-            git config --global user.name "YoungWon Kang"
+            git config --global user.email your_email@example.com
+            git config --global user.name "your_name"
             git config --global user.signingkey {Key ID}
             git config --global commit.gpgsign true
             git config --global gpg.program gpg2
@@ -87,12 +85,3 @@
         </code-block>
     </tab>
 </tabs>
-
-<seealso>
-    <category ref="wrs">
-        <a href="https://plugins.jetbrains.com/plugin/20158-writerside/docs/markup-reference.html">Markup reference</a>
-        <a href="https://plugins.jetbrains.com/plugin/20158-writerside/docs/manage-table-of-contents.html">Reorder topics in the TOC</a>
-        <a href="https://plugins.jetbrains.com/plugin/20158-writerside/docs/local-build.html">Build and publish</a>
-        <a href="https://plugins.jetbrains.com/plugin/20158-writerside/docs/configure-search.html">Configure Search</a>
-    </category>
-</seealso>
