@@ -6,6 +6,11 @@
                  name="cookbook"
                  start-page="readme.md">
     <toc-element topic="readme.md"/>
+    <toc-element topic="ubuntu-startup.md"/>
+    <toc-element topic="docker.md"/>
+    <toc-element topic="pgp.md"/>
+    <toc-element topic="ssh.md"/>
+    <toc-element topic="nodejs.md"/>
+    <toc-element topic="python.md"/>
     <toc-element topic="example.md"/>
-    <toc-element topic="PGP.md"/>
 </instance-profile>
