@@ -18,7 +18,7 @@
 
 ## TLS / SSL 인증서 발급하기 (Let's Encrypt) {id="tls_2"}
 
-### 사전 지식
+### 사전 지식 {id="tls_2_1"}
 
 - SSL 인증서는 인증기관(CA)에서 발급받아야 합니다.
 - 인증서 발급을 위해서는 도메인 소유권을 증명해야 합니다.
@@ -28,13 +28,13 @@
 - DNS 서버에 등록한 DNS TXT 레코드는 인증기관에서 확인합니다.
 - 인증기관은 도메인 소유권을 확인한 후 SSL 인증서를 발급합니다.
 
-### Installation & Requirements
+### Installation & Requirements {id="tls_2_2"}
 
 - Docker
 - 도메인 (가비아 등에서 구매)
 - AWS (Route 53)
 
-### AWS 설정
+### AWS 설정 {id="tls_2_3"}
 <procedure>
 <step>
     <p>AWS 계정 생성</p>
@@ -64,8 +64,8 @@
 </step>
 </procedure>
 
-### TLS / SSL 인증서 발급 스크립트
-#### certbot.sh
+### TLS / SSL 인증서 발급 스크립트 {id="tls_2_4 {id="tls_2"}"}
+#### certbot.sh {id="tls_2_4_1"}
 ```Bash
 #!/bin/bash
 # set -x
@@ -126,7 +126,7 @@ echo "... updaing private+public key - ${BOTH_KEY_PATH}";
 sudo cat ${PRIVATE_KEY_PATH} ${PUBLIC_KEY_PATH} > ${BOTH_KEY_PATH}
 exit 0;
 ```
-#### gencert.sh
+#### gencert.sh {id="tls_2_4_2"}
 ```Bash
 #!/bin/bash
 
@@ -184,7 +184,7 @@ sudo chown ${USER}:${USER} ${CERT_DIR}/ssl.*
 # ${CERT_DIR}/restart-harbor.sh >> ${CERT_DIR}/certbot.log 2>&1
 ```
 
-### TLS / SSL 인증서 발급
+### TLS / SSL 인증서 발급 {id="tls_2_5"}
 <procedure>
     <step>
         <p>.secret 파일 생성</p>
@@ -233,7 +233,7 @@ sudo chown ${USER}:${USER} ${CERT_DIR}/ssl.*
     </step>
 </procedure>
 
-### TLS / SSL 인증서 갱신 자동화
+### TLS / SSL 인증서 갱신 자동화 {id="tls_2_6"}
 - letsencrypt 인증서는 90일마다 갱신해야 합니다.
 - 인증서 갱신은 인증서 발급과 동일한 방법으로 수행합니다.
 - crontab 을 이용하여 인증서 갱신을 자동화 할 수 있습니다.
