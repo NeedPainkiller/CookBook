@@ -1,3 +1,22 @@
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
 manual/200.conf
 azure/*
 
@@ -15,6 +34,6 @@ certbot.log
 *.p7b
 *.p7c
 
-# 인증 필수 정정 값
+# 패스워드 및 비밀 키 파일
 .secret
 
