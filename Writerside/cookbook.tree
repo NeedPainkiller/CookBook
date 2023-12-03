@@ -4,8 +4,8 @@
 
 <instance-profile id="cookbook"
                  name="cookbook"
-                 start-page="example.md">
-
+                 start-page="readme.md">
+    <toc-element topic="readme.md"/>
     <toc-element topic="example.md"/>
     <toc-element topic="PGP.md"/>
 </instance-profile>
