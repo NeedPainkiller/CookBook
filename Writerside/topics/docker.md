@@ -1,10 +1,8 @@
 # Docker
-
 ## Docker 설치 {id="docker_1"}
-
 <tabs>
     <tab title="Docker">
-        <code-block lang="shell">
+        <code-block lang="bash">
             sudo mkdir -m 0755 -p /etc/apt/keyrings
             curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
             <br/>
