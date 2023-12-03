@@ -58,7 +58,6 @@ grep . /etc/*-release
             ip link
             ip addr
             ip route
-            <br/>
             # netplan 비활성화 된 경우
             sudo netplan generate
         </code-block>
@@ -127,8 +126,9 @@ grep . /etc/*-release
     <tab title="Debian (ufw)">
         <p>ubuntu 20.04 이후 권장</p>
         <code-block lang="bash">
+            # sshd 설정 변경
             sudo vi /etc/ssh/sshd_config
-            <br/>
+            # sshd 서비스 재시작
             sudo service sshd restart
             # or
             sudo service ssh restart
@@ -142,18 +142,18 @@ grep . /etc/*-release
     <tab title="Debian (iptables, firewalld)">
         <p>iptables, firewalld 사용 시</p>
         <code-block lang="bash">
+            # sshd 설정 변경
             vi /etc/ssh/sshd_config
             # selinux off
             setenforce 0
-            <br/>
+            # sshd 서비스 재시작
             systemctl restart sshd.service
-            <br/>
             # selinux on
             setenforce 1
-            <br/>
+            # iptables 설정 추가 및 서비스 재시작
             iptables -A INPUT -p tcp --dport 10022 -j ACCEPT
             service iptables restart
-            <br/>
+            # firewalld 설정 추가 및 서비스 재시작
             firewall-cmd --permanent --zone=public --add-port=10022/tcp
             firewall-cmd --reload
         </code-block>
@@ -164,12 +164,11 @@ grep . /etc/*-release
             vi /etc/ssh/sshd_config
             # selinux off
             setenforce 0
-            <br/>
+            # sshd 서비스 재시작
             systemctl restart sshd.service
-            <br/>
             # selinux on
             setenforce 1
-            <br/>
+            # firewalld 설정 추가 및 서비스 재시작
             firewall-cmd --permanent --zone=public --add-port=10022/tcp
             firewall-cmd --reload
         </code-block>

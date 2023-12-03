@@ -14,14 +14,15 @@
     <step>
         <p>.ssh 디렉터리 생성 & 권한 업데이트</p>
         <code-block lang="shell">
+            # .ssh 디렉터리 생성
             mkdir ~/.ssh
-            <br/>
+            # .ssh 필수 파일 생성
             touch ~/.ssh
             touch ~/.ssh/id_rsa
             touch ~/.ssh/id_rsa.pub  
             touch ~/.ssh/authorized_keys
             touch ~/.ssh/known_hosts
-            <br/>
+            # .ssh 디렉터리 및 파일 권한 설정
             chmod 700 ~/.ssh
             chmod 600 ~/.ssh/id_rsa
             chmod 644 ~/.ssh/id_rsa.pub  
