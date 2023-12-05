@@ -3,8 +3,90 @@
 ## 버젼 확인 {id="ubuntu22.04_1"}
 
 ```bash
+uname -mrs
+
 grep . /etc/*-release
+cat /etc/os-release
+
+lsb_release -a
 ```
+
+### ubuntu 20.04 > 22.04 업그레이드 {collapsible="true"}
+
+<procedure>
+    <step>
+        <p>현재 버젼 확인</p>
+        <code-block lang="bash">
+            uname -mrs
+            grep . /etc/*-release
+            cat /etc/os-release
+            lsb_release -a
+        </code-block>
+    </step>
+    <step>
+        <p>릴리즈 타겟 확인</p>
+        <code-block lang="bash">
+        less /etc/update-manager/release-upgrades
+        # Prompt=lts 로 지정되어 있어야 함
+        </code-block>
+    </step>
+    <step>
+        <p>업데이트 전 보류중인 패키지 확인</p>
+        <code-block lang="bash">
+        sudo apt-mark showhold
+        # 보류 중인 패키지가 있는 경우 해제 처리
+        sudo apt-mark unhold [패키지명]
+        </code-block>
+    </step>
+    <step>
+        <p>소프트웨어 패키지 최신 업데이트</p>
+        <code-block lang="bash">
+            # Refresh the apt repo
+            sudo apt update -y
+            # Apply all upgrades
+            sudo apt upgrade -y
+        </code-block>
+    </step>
+    <step>
+        <p>가장 최신 배포 버전을 사용할 수 있는지 확인</p>
+        <code-block lang="bash">
+            sudo apt dist-upgrade
+            # 불필요 패키지 제거
+            sudo apt autoremove
+        </code-block>
+    </step>
+    <step>
+        <p>(원격) SSH TCP 포트 열기</p>
+        <p>서버 재부팅 후 SSH 연결 불가능 이슈 대비</p>
+        <code-block lang="bash">
+            sudo ufw allow 22/tcp comment 'Open port ssh tcp port 1022 as failsafe option for upgrades'
+            sudo ufw status
+        </code-block>
+    </step>
+    <step>
+        <p>update-manager-core 설치</p>
+        <code-block lang="bash">
+            sudo apt install update-manager-core
+        </code-block>
+    </step>
+    <step>
+        <p>업그레이드 진행</p>
+        <code-block lang="bash">
+        sudo do-release-upgrade
+        #업데이트가 불가능한 경우 개발 릴리즈로 업그레이드 가능
+        sudo do-release-upgrade -d
+        </code-block>
+    </step>
+    <step>
+        <p>업그레이드 후 버젼 확인</p>
+        <code-block lang="bash">
+            uname -mrs
+            grep . /etc/*-release
+            cat /etc/os-release
+            lsb_release -a
+        </code-block>
+    </step>
+</procedure>
 
 ## 패키지 업데이트 및 필수 패키지 설치 {id="ubuntu22.04_2"}
 
@@ -12,7 +94,9 @@ grep . /etc/*-release
     <step>
         <p>패키지 저장소 업데이트 및 업그레이드</p>
         <code-block lang="bash">
+             # Refresh the apt repo
             sudo apt update -y
+            # Apply all upgrades
             sudo apt list --upgradable
             sudo apt upgrade -y
         </code-block>
