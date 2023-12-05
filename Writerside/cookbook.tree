@@ -3,7 +3,7 @@
         SYSTEM "https://resources.jetbrains.com/writerside/1.0/product-profile.dtd">
 
 <instance-profile id="cookbook"
-                 name="cookbook"
+                 name="COOKBOOK"
                  start-page="readme.md">
     <toc-element topic="readme.md"/>
     <toc-element topic="ubuntu-startup.md"/>

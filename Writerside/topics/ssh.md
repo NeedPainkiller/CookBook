@@ -1,4 +1,4 @@
-# ssh
+# SSH
 
 ## ssh 설치 및 초기 설정 {id="ssh_1"}
 <procedure xmlns="">
