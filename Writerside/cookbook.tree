@@ -14,5 +14,4 @@
     <toc-element topic="nodejs.md"/>
     <toc-element topic="python.md"/>
     <toc-element topic="tls.md"/>
-    <toc-element topic="example.md"/>
 </instance-profile>
