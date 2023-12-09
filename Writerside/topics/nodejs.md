@@ -35,6 +35,8 @@ yarn --version
 yarn init 
 #package.json 파일 및 해당 종속성에 나열된 모든 모듈을 설치
 yarn or yarn install 
+# node_modules에 이미 설치된 파일이 제거되지 않았는지 확인
+yarn install --check-files
 #특정 패키지의 특정 버전 설치
 yarn add package_name@버전 
 # 패키지 설치 후 package.json에 해당 패키지를 종속성으로 추가합니다.
@@ -43,6 +45,7 @@ yarn add --dev package_name@버전
 yarn add 주소 
 #옵션. 글로벌로 설치. 로컬의 다른 프로젝트도 이 패키지를 사용 가능하게 됩니다.
 yarn global add package_name 
+
 #패키지 삭제 명령어입니다.
 yarn remove 
 #설치한 패키지들을 업데이트해줍니다.
