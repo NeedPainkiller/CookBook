@@ -3,15 +3,21 @@
         SYSTEM "https://resources.jetbrains.com/writerside/1.0/product-profile.dtd">
 
 <instance-profile id="cookbook"
-                 name="COOKBOOK"
-                 start-page="readme.md">
+                  name="COOKBOOK"
+                  start-page="readme.md">
     <toc-element topic="readme.md"/>
-    <toc-element topic="ubuntu-startup.md"/>
-    <toc-element topic="docker.md"/>
-    <toc-element topic="ssh.md"/>
-    <toc-element topic="pgp.md"/>
-    <toc-element topic="git-commit.md"/>
-    <toc-element topic="nodejs.md"/>
-    <toc-element topic="python.md"/>
-    <toc-element topic="tls.md"/>
+    <toc-element topic="devops-index.md">
+        <toc-element topic="ubuntu-startup.md"/>
+        <toc-element topic="docker.md"/>
+        <toc-element topic="ssh.md"/>
+        <toc-element topic="pgp.md"/>
+        <toc-element topic="nodejs.md"/>
+        <toc-element topic="python.md"/>
+    </toc-element>
+    <toc-element topic="git-index.md">
+        <toc-element topic="git-commit.md"/>
+    </toc-element>
+    <toc-element topic="network-index.md">
+        <toc-element topic="network-tls.md"/>
+    </toc-element>
 </instance-profile>
