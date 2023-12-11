@@ -1,4 +1,4 @@
-# SSL/TLS
+# SSL / TLS
 
 ## SSL / TLS {id="tls_1"}
 
