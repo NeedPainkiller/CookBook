@@ -351,10 +351,286 @@ I/O size (minimum/optimal): 512 bytes / 512 bytes
 ## 파티션 생성 {id="ubuntu_partition_3"}
 ### /dev/sda 의 파티션 생성 {id="ubuntu_partition_3_1"}
 <procedure>
-<step>
-</step>
+    <step>
+        <p>파티션 생성</p>
+        <code-block lang="bash">
+            # 2TB 이하
+            sudo fdisk /dev/sda
+        </code-block>
+    </step>
+    <step>
+        <p>물리적 볼륨 (Physical Volume, PV) 생성</p>
+        <code-block lang="bash">
+            sudo pvcreate /dev/sdaX
+        </code-block>
+        <sub><control>/dev/sdaX</control>는 신규로 생성한 파티션</sub>
+    </step>
+    <step>
+        <p>볼륨 그룹 (Volume Group, VG) 생성</p>
+        <code-block lang="bash">
+            sudo vgcreate my_volume_group /dev/sdaX
+        </code-block>
+        <sub><control>my_volume_group</control>은 새로운 볼륨 그룹의 이름</sub>
+    </step>
+    <step>
+        <p>논리 볼륨 생성 생성</p>
+        <code-block lang="bash">
+            sudo lvcreate -n my_logical_volume -L 100G my_volume_group
+        </code-block>
+        <sub><control>my_volume_group</control> 내에 100G 크기의 <control>my_logical_volume</control> 논리 볼륨을 생성</sub>
+    </step>
+    <step>
+        <p>파일 시스템 생성 및 마운트</p>
+        <code-block lang="bash">
+            sudo mkfs.ext4 /dev/my_volume_group/my_logical_volume
+        </code-block>
+        <p>파일 시스템을 마운트 포인트에 마운트</p>
+        <code-block lang="bash">
+            sudo mkdir /mnt/hdd_1
+            sudo mount /dev/my_volume_group/my_logical_volume /mnt/hdd_1
+        </code-block>
+    </step>
+    <step>
+        <p>결과 확인</p>
+        <code-block lang="bash"> 
+            df -h
+        </code-block>
+    </step>
 </procedure>
 
-```bash
-sudo fdisk /dev/sda
+### /dev/sda 의 파티션 생성 (2TiB 이상) {collapsible="true"}
+<procedure>
+    <step>
+        <p>파티션 생성 전</p>
+        <list>
+        <li>
+            <p>기본 MBR(Master Boot Record)은 2TB 이상의 파티션을 지원하지 않는다.</p>
+        </li>
+        <li>
+            <p>2TB 이상의 파티션 생성을 위해서는 GPT(GUID Partition Table) 디스크 레이블을 사용해야 한다.</p>
+        </li>
+        </list>
+</step>
+<step>
+        <p>디스크 포맷 확인</p>
+        <list>
+        <li>
+            <p>parted 명령어</p>
+            <code-block lang="bash">
+                # 디스크가 GPT로 포맷되어 있는지 확인 (parted)
+                sudo parted /dev/sda print
+            </code-block>
+            <sub>조회 결과</sub>
+            <code-block lang="bash">
+                Error: /dev/sda: unrecognised disk label
+                Model: ATA WDC WD40EZAX-00C (scsi)
+                Disk /dev/sda: 4001GB
+                Sector size (logical/physical): 512B/4096B
+                Partition Table: unknown
+                Disk Flags:
+            </code-block>
+        </li>
+        <li>
+            <p>gdisk 명령어</p>
+            <code-block lang="bash">
+                # 디스크가 GPT로 포맷되어 있는지 확인 (gdisk)
+                sudo gdisk -l /dev/sda
+            </code-block>
+            <sub>조회 결과</sub>
+            <code-block lang="bash">
+                GPT fdisk (gdisk) version 1.0.8
+                ---
+                Partition table scan:
+                MBR: protective
+                BSD: not present
+                APM: not present
+                GPT: not present
+            </code-block>
+        </li>
+        </list>
+        <p>GPT 가 아니라면 해당 디스크의 모든 데이터를 백업한 뒤 재포맷 하여야 한다</p>
+    </step>
+    <step> 
+        <p>디스크 포맷 설정</p>
+        <list>
+        <li>
+            <p>GPT 파티션 적용</p>
+            <code-block lang="bash">
+                sudo parted /dev/sda
+            </code-block>  
+            <code>mklabel gpt</code><sub>입력</sub>
+            <code-block lang="bash">
+                GNU Parted 3.4
+                Using /dev/sda
+                Welcome to GNU Parted! Type 'help' to view a list of commands.
+                (parted) mklabel gpt
+                (parted) quit
+            </code-block>
+        </li>
+        <li>
+            <p>포맷 확인</p>
+            <code-block lang="bash">
+                # 디스크가 GPT로 포맷되어 있는지 확인 (parted)
+                sudo parted /dev/sda print
+            </code-block>
+            <code-block lang="bash">
+                Model: ATA WDC WD40EZAX-00C (scsi)
+                Disk /dev/sda: 4001GB
+                Sector size (logical/physical): 512B/4096B
+                Partition Table: gpt
+                Disk Flags:
+                ---
+                Number  Start  End  Size  File system  Name  Flags
+            </code-block>
+            ---
+            <code-block lang="bash">
+                # 디스크가 GPT로 포맷되어 있는지 확인 (gdisk)
+                sudo gdisk -l /dev/sda
+            </code-block>
+            <code-block lang="bash">
+                GPT fdisk (gdisk) version 1.0.8
+                ---
+                Partition table scan:
+                MBR: protective
+                BSD: not present
+                APM: not present
+                GPT: present
+                ---
+                Found valid GPT with protective MBR; using GPT.
+                Disk /dev/sda: 7814037168 sectors, 3.6 TiB
+                Model: WDC WD40EZAX-00C
+                Sector size (logical/physical): 512/4096 bytes
+                Disk identifier (GUID): 99C334F5-73F4-435D-8F00-F4328E440125
+                Partition table holds up to 128 entries
+                Main partition table begins at sector 2 and ends at sector 33
+                First usable sector is 34, last usable sector is 7814037134
+                Partitions will be aligned on 2048-sector boundaries
+                Total free space is 7814037101 sectors (3.6 TiB)
+                Number  Start (sector)    End (sector)  Size       Code  Name
+            </code-block>
+        </li>
+        </list>
+    </step>
+    <step>
+        <p>파티션 생성</p>
+        <code-block lang="bash">
+            sudo parted /dev/sda mkpart primary 0% 100%
+        </code-block>
+        <p>primary는 파티션 타입이며, 파티션의 처음과 끝을 지정한다</p>
+        <p>이후 파티션 명을 확인한다</p>
+        <code-block lang="bash">
+        sudo fdisk -l
+        </code-block>
+        <sub>조회 결과</sub>
+        <code-block lang="bash">
+            Disk /dev/nvme0n1: 931.51 GiB, 1000204886016 bytes, 1953525168 sectors
+            Disk model: CT1000P3SSD8
+            Units: sectors of 1 * 512 = 512 bytes
+            Sector size (logical/physical): 512 bytes / 512 bytes
+            I/O size (minimum/optimal): 512 bytes / 512 bytes
+            Disklabel type: gpt
+            Disk identifier: 7868E63D-D3AC-4727-B8EE-7186B5EF7F64
+            ---
+            Device           Start        End    Sectors   Size Type
+            /dev/nvme0n1p1    2048    2203647    2201600     1G EFI System
+            /dev/nvme0n1p2 2203648    6397951    4194304     2G Linux filesystem
+            /dev/nvme0n1p3 6397952 1953521663 1947123712 928.5G Linux filesystem
+            ---
+            ---
+            Disk /dev/sda: 3.64 TiB, 4000787030016 bytes, 7814037168 sectors
+            Disk model: WDC WD40EZAX-00C
+            Units: sectors of 1 * 512 = 512 bytes
+            Sector size (logical/physical): 512 bytes / 4096 bytes
+            I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+            Disklabel type: gpt
+            Disk identifier: 99C334F5-73F4-435D-8F00-F4328E440125
+            ---
+            Device     Start        End    Sectors  Size Type
+            /dev/sda1   2048 7814035455 7814033408  3.6T Linux filesystem
+            ---
+            ---
+            Disk /dev/mapper/ubuntu--vg-ubuntu--lv: 928.46 GiB, 996923146240 bytes, 1947115520 sectors
+            Units: sectors of 1 * 512 = 512 bytes
+            Sector size (logical/physical): 512 bytes / 512 bytes
+            I/O size (minimum/optimal): 512 bytes / 512 bytes
+        </code-block>
+        <p><control>/dev/sda1</control> 파티션이 신규 생성되었음을 확인할 수 있다</p>
+    </step>
+     <step>
+        <p>파일 시스템 생성</p>
+        <code-block lang="bash">
+            sudo mkfs.ext4 /dev/sda1
+        </code-block>
+        <p>파일 시스템은 일반적으로 <control>ext4</control>를 사용한다</p>
+        <sub>처리 결과</sub>
+        <code-block lang="bash">
+            mke2fs 1.46.5 (30-Dec-2021)
+            Creating filesystem with 976754176 4k blocks and 244195328 inodes
+            Filesystem UUID: ae443103-d309-4e21-ac24-5744a20db2a2
+            Superblock backups stored on blocks:
+                    32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208,
+                    4096000, 7962624, 11239424, 20480000, 23887872, 71663616, 78675968,
+                    102400000, 214990848, 512000000, 550731776, 644972544
+            ---
+            Allocating group tables: done
+            Writing inode tables: done
+            Creating journal (262144 blocks): # 여기서 Enter
+            done
+            Writing superblocks and filesystem accounting information: done
+        </code-block>
+    </step>
+    <step>
+        <p>마운트 및 사용</p>
+        <code-block lang="bash">
+            sudo mkdir /mnt/hdd_1
+            sudo mount /dev/sda1 /mnt/hdd_1
+        </code-block>
+    </step>
+        <step>
+        <p>결과 확인</p>
+        <code-block lang="bash"> 
+            df -h
+        </code-block>
+        <sub>조회 결과</sub>
+        <code-block lang="bash">
+            Filesystem                         Size  Used Avail Use% Mounted on
+            tmpfs                              6.3G  1.7M  6.3G   1% /run
+            /dev/mapper/ubuntu--vg-ubuntu--lv  914G   13G  863G   2% /
+            tmpfs                               32G     0   32G   0% /dev/shm
+            tmpfs                              5.0M     0  5.0M   0% /run/lock
+            /dev/nvme0n1p2                     2.0G  253M  1.6G  14% /boot
+            /dev/nvme0n1p1                     1.1G  6.1M  1.1G   1% /boot/efi
+            tmpfs                              6.3G  4.0K  6.3G   1% /run/user/1000
+            /dev/sda1                          3.6T   28K  3.4T   1% /mnt/hdd_1
+        </code-block>
+    </step>
+</procedure>
+
+## 번외 {id="ubuntu_partition_99"}
+### /dev 디렉터리는 무엇인가? {id="ubuntu_partition_99_1"}
+- Linux는 전통적으로 모든 것을 읽거나 쓸 수 있는 파일이나 디렉터리로 취급한다
+  - /dev 는 모든 장치 파일이 포함된 루트 폴더의 디렉터리
+  - 시스템은 설치 중에 이러한 파일을 생성하며 부팅 프로세스 중에 사용할 수 있어야 한다
+- /dev 디렉토리 에서 장치 파일을 식별할 수 있는 보다 상세하고 직접적인 방법은 장치의 주 번호와 부 번호를 사용하는 것이다
+  - 디스크 장치의 주 번호는 8이며 이를 SCSI 블록 장치 로 지정한다
+  - SCSI 하위 시스템 은 모든 PATA 및 SATA 하드 드라이브를 관리한다
+  - SCSI 는 마이크로프로세서로 제어되는 스마트 버스이며 컴퓨터에 최대 15개의 주변 장치를 추가할 수 있다
+  - 이러한 장치에는 하드 드라이브, 스캐너, USB, 프린터 및 기타 여러 장치가 포함된다
+  - 각 이름은 sd[az] 로 지정되며 이전에는 hd[az] (하드드라이브) 로 지정된 바 있다
+
+- /dev/sda
+    - /dev/sd[az]는 하드 드라이브를 의미한다
+    - Linux는 발견된 첫 번째 하드 디스크를 가져와서 sda 값을 지정한다
+    - 이후 하드 디스크는 sdb, sdc, ... 으로 알파벳 순으로 등록된다
+    - sda[1-15] 의 경우 sda 하드 드라이브의 파티션에 따라 순차 등록된다
+    - 단일 하드 디스크에는 최대 15개의 파티션만 가질 수 있다
+```Bash
+$ ls -l /dev | grep "sda"
+brw-rw----  1 root disk        8,   0  Apr 29 22:33 sda
+brw-rw----  1 root disk        8,   1  Apr 29 22:33 sda1
+brw-rw----  1 root disk        8,   2  Apr 29 22:33 sda2
+brw-rw----  1 root disk        8,   3  Apr 29 22:33 sda3
+brw-rw----  1 root disk        8,   4  Apr 29 22:33 sda4
+brw-rw----  1 root disk        8,   5  Apr 29 22:33 sda5
+brw-rw----  1 root disk        8,   6  Apr 29 22:33 sda6
 ```
