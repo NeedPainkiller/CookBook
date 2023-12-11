@@ -396,6 +396,147 @@ I/O size (minimum/optimal): 512 bytes / 512 bytes
             df -h
         </code-block>
     </step>
+    <step>
+        <p>영구 마운트</p>
+        <p>마운트는 재부팅 이후 다시 초기화 되기 때문에 설정파일에 명시해야 마운트를 유지할 수 있다</p>
+        <code-block lang="bash">
+            sudo vi /etc/fstab
+        </code-block>
+        <sub>입력</sub>
+        <code-block lang="bash">
+            # /mnt/hdd_1 on /dev/sda1
+            /dev/sda1       /mnt/hdd_1      ext4    defaults        1       1
+            # [파일_시스템_장치]  [마운트_포인트]  [파일_시스템_종류]  [특성]  [dump]  [파일체크]
+        </code-block>
+        <table>
+            <thead>
+                    <tr>
+                        <th>파일_시스템_종류</th>
+                        <th>옵션</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ext</td>
+                        <td>초기 리눅스에서 사용되었던 fs-type으로 지금은 사용하고 있지 않다.</td>
+                    </tr>
+                    <tr>
+                        <td>ext2</td>
+                        <td>지금도 사용하고 있는 fs-type으로 긴 파일명을 지원한다.</td>
+                    </tr>
+                    <tr>
+                        <td>ext3</td>
+                        <td>저널링 파일 시스템으로 ext2 에 비교해 파일 시스템 복구 기능 및 보안 기능을 향상시켰다.</td>
+                    </tr>
+                        <tr>
+                        <td>ext4</td>
+                        <td>ext3 다음 버전의 리눅스 표준 파일 시스템으로 16TB까지만 지원하던 ext3 보다 훨씬 큰 용량을 지원한다.</td>
+                    </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+                    <tr>
+                        <th>특성</th>
+                        <th>옵션</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>defaults</td>
+                        <td>rw, nouser, auto, exec, suid 속성을 모두 가지며, 일반적인 파일 시스템에서 사용되는 속성이다</td>
+                    </tr>
+                    <tr>
+                        <td>auto</td>
+                        <td>부팅시 자동 마운트 가능하도록 한다</td>
+                    </tr>
+                    <tr>
+                        <td>noauto</td>
+                        <td>부팅시 자동 마운트가 되지 않도록 한다</td>
+                    </tr>
+                        <tr>
+                        <td>exec</td>
+                        <td>실행파일이 실행되는 것을 허용한다</td>
+                    </tr>
+                    <tr>
+                        <td>noexec</td>
+                        <td>실행파일이 실행되지 않도록 한다</td>
+                    </tr>
+                    <tr>
+                        <td>suid</td>
+                        <td>SetUID와 SetGID의 사용을 허용한다</td>
+                    </tr>
+                    <tr>
+                        <td>nosuid</td>
+                        <td>SetUID와 SetGID의 사용을 허용하지 않는다</td>
+                    </tr>
+                        <tr>
+                        <td>ro</td>
+                        <td>read only, 읽기 전용으로 마운트한다</td>
+                    </tr>
+                    <tr>
+                        <td>rw</td>
+                        <td>read write, 읽기, 쓰기 모두 가능하도록 마운트한다</td>
+                    </tr>
+                    <tr>
+                        <td>user</td>
+                        <td>일반 계정 사용자들도 모두 마운트할 수 있다</td>
+                    </tr>
+                    <tr>
+                        <td>nouser</td>
+                        <td>일반 계정 사용자들은 모두 마운트 할 수 없다</td>
+                    </tr>
+                    <tr>
+                        <td>usrquota</td>
+                        <td>개별 계정 사용자의 디스크 용량을 제한하기 위해 Quota를 설정한다</td>
+                    </tr>
+                    <tr>
+                        <td>grpquota</td>
+                        <td>그룹 별로 Quota 용량을 설정한다</td>
+                    </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+                    <tr>
+                        <th>dump</th>
+                        <th>옵션</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0</td>
+                        <td>백업 불가능한 파일 시스템</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>dump가 가능한 백업 가능한 파일 시스템</td>
+                    </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+                    <tr>
+                        <th>파일체크</th>
+                        <th>옵션</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0</td>
+                        <td>부팅시 파일 시스템 점검하지 않음</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>루트 파일 시스템으로 부팅시 파일 시스템을 점검한다</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>루트 파일 시스템 이외의 파일시스템으로서 부팅시 파일 시스템을 점검한다.</td>
+                    </tr>
+            </tbody>
+        </table>
+    </step>
 </procedure>
 
 ### /dev/sda 의 파티션 생성 (2TiB 이상) {collapsible="true"}
@@ -603,6 +744,147 @@ I/O size (minimum/optimal): 512 bytes / 512 bytes
             tmpfs                              6.3G  4.0K  6.3G   1% /run/user/1000
             /dev/sda1                          3.6T   28K  3.4T   1% /mnt/hdd_1
         </code-block>
+    </step>
+    <step>
+        <p>영구 마운트</p>
+        <p>마운트는 재부팅 이후 다시 초기화 되기 때문에 설정파일에 명시해야 마운트를 유지할 수 있다</p>
+        <code-block lang="bash">
+            sudo vi /etc/fstab
+        </code-block>
+        <sub>입력</sub>
+        <code-block lang="bash">
+            # /mnt/hdd_1 on /dev/sda1
+            /dev/sda1       /mnt/hdd_1      ext4    defaults        1       1
+            # [파일_시스템_장치]  [마운트_포인트]  [파일_시스템_종류]  [특성]  [dump]  [파일체크]
+        </code-block>
+        <table>
+            <thead>
+                    <tr>
+                        <th>파일_시스템_종류</th>
+                        <th>옵션</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ext</td>
+                        <td>초기 리눅스에서 사용되었던 fs-type으로 지금은 사용하고 있지 않다.</td>
+                    </tr>
+                    <tr>
+                        <td>ext2</td>
+                        <td>지금도 사용하고 있는 fs-type으로 긴 파일명을 지원한다.</td>
+                    </tr>
+                    <tr>
+                        <td>ext3</td>
+                        <td>저널링 파일 시스템으로 ext2 에 비교해 파일 시스템 복구 기능 및 보안 기능을 향상시켰다.</td>
+                    </tr>
+                        <tr>
+                        <td>ext4</td>
+                        <td>ext3 다음 버전의 리눅스 표준 파일 시스템으로 16TB까지만 지원하던 ext3 보다 훨씬 큰 용량을 지원한다.</td>
+                    </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+                    <tr>
+                        <th>특성</th>
+                        <th>옵션</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>defaults</td>
+                        <td>rw, nouser, auto, exec, suid 속성을 모두 가지며, 일반적인 파일 시스템에서 사용되는 속성이다</td>
+                    </tr>
+                    <tr>
+                        <td>auto</td>
+                        <td>부팅시 자동 마운트 가능하도록 한다</td>
+                    </tr>
+                    <tr>
+                        <td>noauto</td>
+                        <td>부팅시 자동 마운트가 되지 않도록 한다</td>
+                    </tr>
+                        <tr>
+                        <td>exec</td>
+                        <td>실행파일이 실행되는 것을 허용한다</td>
+                    </tr>
+                    <tr>
+                        <td>noexec</td>
+                        <td>실행파일이 실행되지 않도록 한다</td>
+                    </tr>
+                    <tr>
+                        <td>suid</td>
+                        <td>SetUID와 SetGID의 사용을 허용한다</td>
+                    </tr>
+                    <tr>
+                        <td>nosuid</td>
+                        <td>SetUID와 SetGID의 사용을 허용하지 않는다</td>
+                    </tr>
+                        <tr>
+                        <td>ro</td>
+                        <td>read only, 읽기 전용으로 마운트한다</td>
+                    </tr>
+                    <tr>
+                        <td>rw</td>
+                        <td>read write, 읽기, 쓰기 모두 가능하도록 마운트한다</td>
+                    </tr>
+                    <tr>
+                        <td>user</td>
+                        <td>일반 계정 사용자들도 모두 마운트할 수 있다</td>
+                    </tr>
+                    <tr>
+                        <td>nouser</td>
+                        <td>일반 계정 사용자들은 모두 마운트 할 수 없다</td>
+                    </tr>
+                    <tr>
+                        <td>usrquota</td>
+                        <td>개별 계정 사용자의 디스크 용량을 제한하기 위해 Quota를 설정한다</td>
+                    </tr>
+                    <tr>
+                        <td>grpquota</td>
+                        <td>그룹 별로 Quota 용량을 설정한다</td>
+                    </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+                    <tr>
+                        <th>dump</th>
+                        <th>옵션</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0</td>
+                        <td>백업 불가능한 파일 시스템</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>dump가 가능한 백업 가능한 파일 시스템</td>
+                    </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+                    <tr>
+                        <th>파일체크</th>
+                        <th>옵션</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0</td>
+                        <td>부팅시 파일 시스템 점검하지 않음</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>루트 파일 시스템으로 부팅시 파일 시스템을 점검한다</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>루트 파일 시스템 이외의 파일시스템으로서 부팅시 파일 시스템을 점검한다.</td>
+                    </tr>
+            </tbody>
+        </table>
     </step>
 </procedure>
 
