@@ -19,6 +19,7 @@
     </toc-element>
     <toc-element topic="git-index.md">
         <toc-element topic="git-commit.md"/>
+        <toc-element topic="git-gitlab.md"/>
     </toc-element>
     <toc-element topic="network-index.md">
         <toc-element topic="network-tls.md"/>
