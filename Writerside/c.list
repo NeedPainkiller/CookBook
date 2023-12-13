@@ -3,6 +3,11 @@
         SYSTEM "https://resources.jetbrains.com/writerside/1.0/categories.dtd">
 <categories>
     <category id="wrs" name="Writerside documentation" order="1"/>
-    <category id="external" name="external documentation" order="2"/>
-    <category id="kam6512" name="강영원" order="99"/>
+
+    <category id="children-page" name="DevOps" order="99"/>
+
+    <category id="reference" name="참고" order="1"/>
+    <category id="external" name="외부 링크" order="2"/>
+
+    <category id="kam6512" name="강영원" order="100"/>
 </categories>
