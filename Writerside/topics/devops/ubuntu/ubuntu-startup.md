@@ -168,8 +168,8 @@ lsb_release -a
               renderer: networkd
               ethernets:
                 ens18:
-                  dhcp4: no
-                  dhcp6: no
+                  dhcp4: no
+                  dhcp6: no
                   addresses:
                     - 192.168.0.12/24
                   nameservers:
