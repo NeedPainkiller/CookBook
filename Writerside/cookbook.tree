@@ -8,14 +8,22 @@
     <toc-element topic="readme.md"/>
     <toc-element topic="devops-index.md">
         <toc-element topic="ubuntu-index.md">
+            <toc-element topic="ubuntu-command-index.md">
+                <toc-element topic="ubuntu-command-rsync.md"/>
+            </toc-element>
             <toc-element topic="ubuntu-startup.md"/>
             <toc-element topic="ubuntu-partition.md"/>
         </toc-element>
-        <toc-element topic="docker.md"/>
-        <toc-element topic="ssh.md"/>
-        <toc-element topic="pgp.md"/>
-        <toc-element topic="nodejs.md"/>
-        <toc-element topic="python.md"/>
+        <toc-element topic="auth-index.md">
+            <toc-element topic="auth-ssh.md"/>
+            <toc-element topic="auth-pgp.md"/>
+        </toc-element>
+        <toc-element topic="docker-index.md">
+            <toc-element topic="docker.md"/>
+            <toc-element topic="docker-compose.md"/>
+            <toc-element topic="podman.md"/>
+            <toc-element topic="docker-safe-image.md"/>
+        </toc-element>
     </toc-element>
     <toc-element topic="git-index.md">
         <toc-element topic="git-commit.md"/>
@@ -23,10 +31,13 @@
     </toc-element>
     <toc-element topic="network-index.md">
         <toc-element topic="network-tls.md"/>
+        <toc-element topic="network-nginx.md"/>
     </toc-element>
     <toc-element topic="db-index.md">
         <toc-element topic="db-mssql-index.md">
             <toc-element topic="db-mssql-backup.md"/>
         </toc-element>
     </toc-element>
+    <toc-element topic="nodejs.md"/>
+    <toc-element topic="python.md"/>
 </instance-profile>
