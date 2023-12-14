@@ -1,6 +1,7 @@
 # SSH
 
 ## ssh 설치 및 초기 설정 {id="ssh_1"}
+
 <procedure xmlns="">
     <step>
         <p>ssh 설치</p>
@@ -30,19 +31,169 @@
             chmod 644 ~/.ssh/known_hosts
         </code-block>
     </step>
+    <step>
+        <p>ssh 포트 변경</p>
+        <code-block lang="bash">
+            # sshd 설정 변경
+            sudo vi /etc/ssh/sshd_config
+            ---
+            # sshd 서비스 재시작
+            sudo service sshd restart
+            # or
+            sudo service ssh restart
+            # or
+            sudo service ssh --full-restart
+            ---
+            # 포트 확인
+            netstat -tnlp
+            ---
+            # 포트 전환
+            sudo ufw deny 22
+            sudo ufw allow 10022
+        </code-block>
+    </step>
 </procedure>
 
+### /etc/ssh/sshd_config 파일 설정 {id="ssh_1_1"} {collapsible="true"}
+
+```bash
+# This is the sshd server system-wide configuration file.  See
+# sshd_config(5) for more information.
+
+# This sshd was compiled with PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+
+# The strategy used for options in the default sshd_config shipped with
+# OpenSSH is to specify options with their default value where
+# possible, but leave them commented.  Uncommented options override the
+# default value.
+
+Include /etc/ssh/sshd_config.d/*.conf
+
+Port 10022
+#AddressFamily any
+ListenAddress 0.0.0.0
+ListenAddress ::
+
+#HostKey /etc/ssh/ssh_host_rsa_key
+#HostKey /etc/ssh/ssh_host_ecdsa_key
+#HostKey /etc/ssh/ssh_host_ed25519_key
+
+# Ciphers and keying
+#RekeyLimit default none
+
+# Logging
+#SyslogFacility AUTH
+#LogLevel INFO
+
+# Authentication:
+
+#LoginGraceTime 2m
+#PermitRootLogin prohibit-password
+#StrictModes yes
+#MaxAuthTries 6
+#MaxSessions 10
+
+#PubkeyAuthentication yes
+
+# Expect .ssh/authorized_keys2 to be disregarded by default in future.
+#AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys2
+
+#AuthorizedPrincipalsFile none
+
+#AuthorizedKeysCommand none
+#AuthorizedKeysCommandUser nobody
+
+# For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+#HostbasedAuthentication no
+# Change to yes if you don't trust ~/.ssh/known_hosts for
+# HostbasedAuthentication
+#IgnoreUserKnownHosts no
+# Don't read the user's ~/.rhosts and ~/.shosts files
+#IgnoreRhosts yes
+
+# To disable tunneled clear text passwords, change to no here!
+PasswordAuthentication yes
+#PermitEmptyPasswords no
+
+# Change to yes to enable challenge-response passwords (beware issues with
+# some PAM modules and threads)
+KbdInteractiveAuthentication no
+
+# Kerberos options
+#KerberosAuthentication no
+#KerberosOrLocalPasswd yes
+#KerberosTicketCleanup yes
+#KerberosGetAFSToken no
+
+# GSSAPI options
+#GSSAPIAuthentication no
+#GSSAPICleanupCredentials yes
+#GSSAPIStrictAcceptorCheck yes
+#GSSAPIKeyExchange no
+
+# Set this to 'yes' to enable PAM authentication, account processing,
+# and session processing. If this is enabled, PAM authentication will
+# be allowed through the KbdInteractiveAuthentication and
+# PasswordAuthentication.  Depending on your PAM configuration,
+# PAM authentication via KbdInteractiveAuthentication may bypass
+# the setting of "PermitRootLogin without-password".
+# If you just want the PAM account and session checks to run without
+# PAM authentication, then enable this but set PasswordAuthentication
+# and KbdInteractiveAuthentication to 'no'.
+UsePAM yes
+
+#AllowAgentForwarding yes
+#AllowTcpForwarding yes
+#GatewayPorts no
+X11Forwarding yes
+#X11DisplayOffset 10
+#X11UseLocalhost yes
+#PermitTTY yes
+PrintMotd no
+#PrintLastLog yes
+#TCPKeepAlive yes
+#PermitUserEnvironment no
+#Compression delayed
+#ClientAliveInterval 0
+#ClientAliveCountMax 3
+#UseDNS no
+#PidFile /run/sshd.pid
+#MaxStartups 10:30:100
+#PermitTunnel no
+#ChrootDirectory none
+#VersionAddendum none
+
+# no default banner path
+#Banner none
+
+# Allow client to pass locale environment variables
+AcceptEnv LANG LC_*
+
+# override default of no subsystems
+Subsystem       sftp    /usr/lib/openssh/sftp-server
+
+# Example of overriding settings on a per-user basis
+#Match User anoncvs
+#       X11Forwarding no
+#       AllowTcpForwarding no
+#       PermitTTY no
+#       ForceCommand cvs server
+```
+
 ## ssh 키 생성 {id="ssh_2"}
+
 ```bash
 ssh-keygen -t ed25519 -C "your_email@example.com"
 # 패스워드 지정 권장
 ```
+
 - RSA 대신 Ed25519 암호 알고리즘을 권장
 - 이후 .ssh 의 ```id_ed25519``` 개인 키와 ```id_ed25519.pub``` 공개 키 생성됨
 - 개인 키, 공개 키 백업 필수
 - ```id_ed25519.pub``` 공개 키의 파일 내용을 복사하여 Github 등의 ssh 인증이 필요한 서비스에 등록하여 사용
 
 #### Ed25519 암호 알고리즘을 사용하는 이유 {collapsible="true"}
+
 - SHA-512 및 Curve25519를 사용한 EdDSA 서명 체계
 - 빠른 단일 서명 확인 (Fast single-signature verification)
 - 매우 빠른 배치 검증 (Even faster batch verification)
@@ -54,3 +205,50 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 - 비밀 지점 조건이 없음(No secret branch conditions)
 - 작은 서명(Small signatures)
 - 작은 키(Small keys)
+
+## WSL 환경에서 SSH 접속 {id="ssh_3"}
+- WSL 은 Windows 환경 내에서 internal 한 IP 를 가진다
+- WLS 의 내부 IP 를 찾아 포워딩을 해주어야 한다.
+
+- 아래 파워쉘 스크립트를 실행하면 WSL 의 내부 IP 를 찾아 포워딩을 해준다.
+- 스케쥴러 또는 자동실행을 걸어두자
+```ps1
+$remoteport = bash.exe -c "ifconfig eth0 | grep 'inet '"
+$found = $remoteport -match '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}';
+
+if( $found ){
+  $remoteport = $matches[0];
+} else{
+  echo "The Script Exited, the ip address of WSL 2 cannot be found";
+  exit;
+}
+
+#[Ports]
+#All the ports you want to forward separated by coma
+$ports=@(10022);
+
+#[Static ip]
+#You can change the addr to your ip config to listen to a specific address
+$addr='0.0.0.0';
+$ports_a = $ports -join ",";
+
+#Remove Firewall Exception Rules
+iex "Remove-NetFireWallRule -DisplayName 'WSL 2 Firewall Unlock' ";
+
+#adding Exception Rules for inbound and outbound Rules
+iex "New-NetFireWallRule -DisplayName 'WSL 2 Firewall Unlock' -Direction Outbound -LocalPort $ports_a -Action Allow -Protocol TCP";
+iex "New-NetFireWallRule -DisplayName 'WSL 2 Firewall Unlock' -Direction Inbound -LocalPort $ports_a -Action Allow -Protocol TCP";
+
+for( $i = 0; $i -lt $ports.length; $i++ ){
+  $port = $ports[$i];
+  iex "netsh interface portproxy delete v4tov4 listenport=$port listenaddress=$addr";
+  iex "netsh interface portproxy add v4tov4 listenport=$port listenaddress=$addr connectport=$port connectaddress=$remoteport";
+}
+Invoke-Expression "netsh interface portproxy show v4tov4";
+```
+
+<seealso>
+    <category ref="refernce">
+        <a href="https://jackcokebb.tistory.com/18">WSL 외부 접속 설정하기 - ssh, 포트포워딩</a>
+    </category>
+</seealso>
