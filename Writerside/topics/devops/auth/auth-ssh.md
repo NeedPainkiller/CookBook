@@ -52,6 +52,17 @@
             sudo ufw allow 10022
         </code-block>
     </step>
+    <step>
+        <p>ssh 서비스 자동 시작</p>
+        <code-block lang="bash">
+            sudo systemctl enable ssh
+            # or
+            sudo systemctl enable ssh.service
+            # or
+            sudo update-rc.d ssh defaults
+            sudo systemctl enable ssh.socket
+        </code-block>
+    </step>
 </procedure>
 
 ### /etc/ssh/sshd_config 파일 설정 {id="ssh_1_1"} {collapsible="true"}
