@@ -1,5 +1,6 @@
 # Docker Compose
 ## 설치 {id="docker-compose_1"}
+- https://github.com/docker/compose/releases 의 릴리즈 정보 참고 할 것
 ```Bash
 # Docker 설치 후 수행 할 것
 sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
