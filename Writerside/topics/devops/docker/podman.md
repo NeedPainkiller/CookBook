@@ -36,6 +36,7 @@
 
 ## 설치 {id="podman_2"}
 
+## Podman {id="podman_2_1"}
 <tabs>
     <tab title="RHEL/CentOS/Oracle/Amazon">
         <code-block lang="bash">
@@ -59,6 +60,76 @@
     </tab>
 </tabs>
 
+- 버젼 확인
+```Bash
+podman -v
+```
+
+## Podman Compose {id="podman_2_2"}
+<tabs>
+    <tab title="RHEL/CentOS/Oracle/Amazon">
+        <code-block lang="bash">
+            sudo yum install python3-pip -y
+            # or
+            sudo -H pip3 install --upgrade pip
+            sudo pip3 install podman-compose
+        </code-block>
+    </tab>
+    <tab title="Ubuntu">
+        <code-block lang="bash">
+            sudo apt install python3-pip -y
+            # or
+            sudo -H pip3 install --upgrade pip
+            sudo pip3 install podman-compose
+        </code-block>
+    </tab>
+    <tab title="MacOS">
+        <code-block lang="bash">
+            brew install python3-pip
+        </code-block>
+    </tab>
+</tabs>
+
+- 버젼 확인
+```Bash
+podman-compose version
+```
+
+- Docker Compose 설치
+  - https://github.com/docker/compose/releases 의 릴리즈 정보 참고 할 것
+<tabs>
+    <tab title="RHEL/CentOS/Oracle/Amazon">
+        <code-block lang="bash">
+            sudo yum install podman-docker -y
+        </code-block>
+    </tab>
+    <tab title="Ubuntu">
+        <code-block lang="bash">
+            sudo apt install podman-docker -y
+        </code-block>
+    </tab>
+    <tab title="MacOS">
+        <code-block lang="bash">
+            brew install podman-docker
+        </code-block>
+    </tab>
+</tabs>
+
+```Bash
+# 위 설치 후 수행 할 것
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+```
+
+### Podman Socket {id="podman_2_3"}
+- Unix 소켓을 만들어 Docker 작성 기능을 작동하려면 Podman 소켓을 활성화해야 한다
+- Docker Compose / Podman Compose 간 호환성을 위해 필요하다
+
+```Bash
+sudo systemctl enable --now podman.socket
+sudo systemctl status podman.socket
+```
 ## Alias 설정 {id="podman_3"}
 
 - podman 은 기본적으로 docker 와 명령어가 호환 가능하다
