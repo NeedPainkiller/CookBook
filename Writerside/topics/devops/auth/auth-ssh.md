@@ -212,7 +212,7 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 
 - 아래 파워쉘 스크립트를 실행하면 WSL 의 내부 IP 를 찾아 포워딩을 해준다.
 - 스케쥴러 또는 자동실행을 걸어두자
-```ps1
+```bash
 $remoteport = bash.exe -c "ifconfig eth0 | grep 'inet '"
 $found = $remoteport -match '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}';
 
@@ -248,7 +248,7 @@ Invoke-Expression "netsh interface portproxy show v4tov4";
 ```
 
 <seealso>
-    <category ref="refernce">
+    <category ref="reference">
         <a href="https://jackcokebb.tistory.com/18">WSL 외부 접속 설정하기 - ssh, 포트포워딩</a>
     </category>
 </seealso>
