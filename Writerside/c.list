@@ -6,8 +6,9 @@
 
     <category id="children-page" name="하위 문서" order="99"/>
 
-    <category id="reference" name="참고" order="1"/>
-    <category id="external" name="외부 링크" order="2"/>
+    <category id="official" name="공식 문서" order="10"/>
+    <category id="reference" name="참고" order="20"/>
+    <category id="external" name="외부 링크" order="30"/>
 
     <category id="kam6512" name="강영원" order="100"/>
 </categories>

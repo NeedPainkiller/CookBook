@@ -222,10 +222,12 @@ podman generate kube [컨테이너_ID]
 - buildah 는 Dockerfile 을 사용하여 이미지를 빌드하고, skopeo 는 이미지를 push, pull 한다.
 
 <seealso>
-  <category ref="reference">
+  <category ref="official">
     <a href="https://www.redhat.com/ko/topics/containers/what-is-podman">Podman 이란? - Red Hat</a>
-    <a href="https://hbase.tistory.com/435">Podman 설치 및 사용법 - Docker desktop의 대체재</a>
     <a href="https://docs.oracle.com/ko/learn/podman-compose/#prerequisites">Podman으로 파일 작성 사용 - Oracle</a>
+  </category>
+  <category ref="reference">
+    <a href="https://hbase.tistory.com/435">Podman 설치 및 사용법 - Docker desktop의 대체재</a>
     <a href="https://velog.io/@composite/Podman-Compose-설치-방법">Podman Compose 설치 방법</a>
   </category>
 </seealso>
