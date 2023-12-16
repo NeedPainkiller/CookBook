@@ -13,6 +13,7 @@
             <toc-element topic="ubuntu-command-index.md">
                 <toc-element topic="ubuntu-command-rsync.md"/>
             </toc-element>
+            <toc-element topic="ubuntu-wsl.md"/>
         </toc-element>
         <toc-element topic="auth-index.md">
             <toc-element topic="auth-ssh.md"/>
