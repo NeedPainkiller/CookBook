@@ -217,47 +217,6 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 - 작은 서명(Small signatures)
 - 작은 키(Small keys)
 
-## WSL 환경에서 SSH 접속 {id="ssh_3"}
-- WSL 은 Windows 환경 내에서 internal 한 IP 를 가진다
-- WLS 의 내부 IP 를 찾아 포워딩을 해주어야 한다.
-
-- 아래 파워쉘 스크립트를 실행하면 WSL 의 내부 IP 를 찾아 포워딩을 해준다.
-- 스케쥴러 또는 자동실행을 걸어두자
-```bash
-$remoteport = bash.exe -c "ifconfig eth0 | grep 'inet '"
-$found = $remoteport -match '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}';
-
-if( $found ){
-  $remoteport = $matches[0];
-} else{
-  echo "The Script Exited, the ip address of WSL 2 cannot be found";
-  exit;
-}
-
-#[Ports]
-#All the ports you want to forward separated by coma
-$ports=@(10022);
-
-#[Static ip]
-#You can change the addr to your ip config to listen to a specific address
-$addr='0.0.0.0';
-$ports_a = $ports -join ",";
-
-#Remove Firewall Exception Rules
-iex "Remove-NetFireWallRule -DisplayName 'WSL 2 Firewall Unlock' ";
-
-#adding Exception Rules for inbound and outbound Rules
-iex "New-NetFireWallRule -DisplayName 'WSL 2 Firewall Unlock' -Direction Outbound -LocalPort $ports_a -Action Allow -Protocol TCP";
-iex "New-NetFireWallRule -DisplayName 'WSL 2 Firewall Unlock' -Direction Inbound -LocalPort $ports_a -Action Allow -Protocol TCP";
-
-for( $i = 0; $i -lt $ports.length; $i++ ){
-  $port = $ports[$i];
-  iex "netsh interface portproxy delete v4tov4 listenport=$port listenaddress=$addr";
-  iex "netsh interface portproxy add v4tov4 listenport=$port listenaddress=$addr connectport=$port connectaddress=$remoteport";
-}
-Invoke-Expression "netsh interface portproxy show v4tov4";
-```
-
 <seealso>
     <category ref="reference">
         <a href="https://jackcokebb.tistory.com/18">WSL 외부 접속 설정하기 - ssh, 포트포워딩</a>
