@@ -137,8 +137,17 @@ sudo systemctl status podman.socket
 ```Bash
 alias docker=podman
 ```
+## 주의 사항 {id="podman_4"}
+- podman 은 기본 이미지 저장소를 RedHat 의 quay.io 로 설정한다 
+- docker.io 이미지 저장소를 사용하려면 이미지 주소 앞에 "docker.io" 를 붙여야 한다
+- [ISSUE : 이름 또는 ID 앱이 있는 컨테이너를 찾을 수 없습니다](https://github.com/containers/podman-compose/issues/248#issuecomment-1312567169)
+```Bash
+  redis:
+    restart: always
+    image: docker.io/redis
+```
 
-## podman 명령어 {id="podman_4"}
+## podman 명령어 {id="podman_5"}
 
 ```bash
 # Image 다운로드 
@@ -163,16 +172,16 @@ podman rm [컨테이너_ID_또는_이름]
 podman container restore --import=/tmp/backup.tar
 
 # 현재 실행 중인 Container 목록
-podman  ps
+podman ps
 # 모든 Container 목록
-podman  ps -a
+podman ps -a
 
 # 실행 중인 Container 중지
-podman  stop [컨테이너_ID_또는_이름]
+podman stop [컨테이너_ID_또는_이름]
 # Container 재시작
-podman  restart [컨테이너_ID_또는_이름]
+podman restart [컨테이너_ID_또는_이름]
 # Container 삭제
-podman  rm [컨테이너_ID_또는_이름]
+podman rm [컨테이너_ID_또는_이름]
 
 # Pod 생성
 podman pod create --name [Pod_이름]
@@ -206,7 +215,7 @@ podman generate kube [컨테이너_ID]
 
 ```
 
-## Pod {id="podman_5"}
+## Pod {id="podman_6"}
 
 - 함께 실행되며 동일한 리소스를 공유하는 컨테이너 그룹
 - 쿠버네티스 Pod와 유사하지만, 쿠버네티스와는 별개의 개념이다
@@ -216,7 +225,7 @@ podman generate kube [컨테이너_ID]
 - Podman은 컨테이너, Pod, 컨테이너 이미지 및 볼륨을 위한 API를 제공하는 간단한 커맨드라인 인터페이스(CLI)와 libpod 라이브러리를 통해 pod를 관리한다
 - Podman의 CLI는 컨테이너 런타임과 형식을 위한 업계 표준을 준수하도록 설계된 Open Container Initiative(OCI) 컨테이너를 생성하고 지원
 
-## Buildah, Skopeo {id="podman_6"}
+## Buildah, Skopeo {id="podman_7"}
 
 - Podman은 Docker와 달리 build, push 명령어를 제공하지 않는다, 대신에 buildah, skopeo 를 사용한다.
 - buildah 는 Dockerfile 을 사용하여 이미지를 빌드하고, skopeo 는 이미지를 push, pull 한다.
