@@ -290,6 +290,8 @@ sudo adduser nobody
     <step>
         <p>sudo 권한 계정 확인 및 su 전환 보안<sub>(sudo 권한 계정이 없는 경우 생략)</sub></p>
         <code-block lang="bash">
+            # root 전환 후 수행할 것
+            sudo su root
             sudo visudo
         </code-block>        
         <p>su 시 패스워드 강제 요구 <code>Defaults        rootpw</code> 구문 추가</p>

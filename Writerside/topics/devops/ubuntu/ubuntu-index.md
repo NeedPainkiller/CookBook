@@ -12,8 +12,8 @@
 
 <seealso>
     <category ref="children-page">
-               <a href="ubuntu-startup.md">SSH</a>
-               <a href="ubuntu-partition.md">PGP</a>
-               <a href="ubuntu-startup.md">PGP</a>
+               <a href="ubuntu-startup.md">최초 설정 & 패키지 설치</a>
+               <a href="ubuntu-partition.md">디스크 & 파티션 관리</a>
+               <a href="ubuntu-wsl.md">WSL 설정</a>
     </category>
 </seealso>

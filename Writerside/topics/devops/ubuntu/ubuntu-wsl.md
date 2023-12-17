@@ -28,7 +28,7 @@ wsl --update
 wsl -l -v
 ```
 
-- ## WSL 인스턴스 관리 {id="wsl_2"}
+## WSL 인스턴스 관리 {id="wsl_2"}
 ```Bash
 # 전체 종료
 wsl --shutdown
@@ -37,6 +37,12 @@ wsl --shutdown
 wsl -t [인스턴스 명]
 # 시작 
 wsl -d [인스턴스 명] 
+```
+
+## WSL 내 ROOT 직접 접속 {id="wsl_2_1"}
+- 패스워드 에러 또는 sudo 에러가 발생할 경우
+```Bash
+wsl --user root
 ```
 
 ## 설치 후 작업 {id="wsl_3"}
