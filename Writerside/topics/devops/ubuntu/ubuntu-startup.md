@@ -219,8 +219,10 @@ lsb_release -a
             # 포트 확인
             netstat -tnlp
             # 포트 전환
+            sudo ufw enable
             sudo ufw deny 22
             sudo ufw allow 10022
+            sudo ufw status
         </code-block>
     </tab>
     <tab title="Debian (iptables, firewalld)">
