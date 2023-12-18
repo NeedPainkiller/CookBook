@@ -147,6 +147,110 @@ alias docker=podman
     image: docker.io/redis
 ```
 
+### Docker 에서 마이그레이션 시 이슈 {id="podman_4_1"}
+#### CNI (Container Network Interface) 버젼 오류
+```Bash
+podman network ls
+```
+<sub>결과</sub>
+
+```Bash
+WARN[0000] Error validating CNI config file /home/orca/.config/cni/net.d/my-ecosystem_default.conflist: [plugin bridge does not support config version "1.0.0" plugin portmap does not support config version "1.0.0" plugin firewall does not support config version "1.0.0" plugin tuning does not support config version "1.0.0"]
+NETWORK ID    NAME                  VERSION     PLUGINS
+2f259bab93aa  podman                0.4.0       bridge,portmap,firewall,tuning
+6dba0e056a86  my-ecosystem_default  1.0.0       bridge,portmap,firewall,tuning,dnsname
+```
+- podman 기본 네트워크는 CNI 버젼 0.4.0 이다, 하지만 컨테이너를 올릴 때 추가되는 네트워크는 CNI 버젼 1.0.0 이다
+
+- Compose 를 통해 컨테이너를 실행하면 아래 에러가 발생한다.
+```Bash
+WARN[0000] Error validating CNI config file /home/orca/.config/cni/net.d/my-ecosystem_default.conflist: [plugin bridge does not support config version "1.0.0" plugin portmap does not support config version "1.0.0" plugin firewall does not support config version "1.0.0" plugin tuning does not support config version "1.0.0"]
+WARN[0000] Error validating CNI config file /home/orca/.config/cni/net.d/my-ecosystem_default.conflist: [plugin bridge does not support config version "1.0.0" plugin portmap does not support config version "1.0.0" plugin firewall does not support config version "1.0.0" plugin tuning does not support config version "1.0.0"]
+ERRO[0000] error loading cached network config: network "my-ecosystem_default" not found in CNI cache
+WARN[0000] falling back to loading from existing plugins on disk
+WARN[0000] Error validating CNI config file /home/orca/.config/cni/net.d/my-ecosystem_default.conflist: [plugin bridge does not support config version "1.0.0" plugin portmap does not support config version "1.0.0" plugin firewall does not support config version "1.0.0" plugin tuning does not support config version "1.0.0"]
+ERRO[0000] Error tearing down partially created network namespace for container 5da6ae5d4a74eace95963032c366da67aa0830e84677650bfed9bbe620933f6c: CNI network "my-ecosystem_default" not found
+Error: unable to start container 5da6ae5d4a74eace95963032c366da67aa0830e84677650bfed9bbe620933f6c: error configuring network namespace for container 5da6ae5d4a74eace95963032c366da67aa0830e84677650bfed9bbe620933f6c: CNI network "my-ecosystem_default" not found
+exit code: 125
+```
+- CNI 버젼이 1.0.0 이면 이를 지원하지 않는다는 에러가 발생한다
+- ~/.config/cni/net.d/my-ecosystem_default.conflist 파일을 열어보면 버젼이 1.0.0 으로 되어있다
+```json
+{
+   "args": {
+      "podman_labels": {
+         "com.docker.compose.project": "my-ecosystem",
+         "io.podman.compose.project": "my-ecosystem"
+      }
+   },
+   "cniVersion": "1.0.0",
+   "name": "my-ecosystem_default",
+   "plugins": [
+      {
+         "type": "bridge",
+         "bridge": "cni-podman1",
+         "isGateway": true,
+         "ipMasq": true,
+         "hairpinMode": true,
+         "ipam": {
+            "type": "host-local",
+            "routes": [
+               {
+                  "dst": "0.0.0.0/0"
+               }
+            ],
+            "ranges": [
+               [
+                  {
+                     "subnet": "10.89.0.0/24",
+                     "gateway": "10.89.0.1"
+                  }
+               ]
+            ]
+         }
+      },
+      {
+         "type": "portmap",
+         "capabilities": {
+            "portMappings": true
+         }
+      },
+      {
+         "type": "firewall",
+         "backend": ""
+      },
+      {
+         "type": "tuning"
+      },
+      {
+         "type": "dnsname",
+         "domainName": "dns.podman",
+         "capabilities": {
+            "aliases": true
+         }
+      }
+   ]
+}
+```                        
+- "cniVersion": "1.0.0" 을 "cniVersion": "0.4.0" 으로 변경하면 에러가 발생하지 않는다.
+- [참조](https://www.reddit.com/r/podman/comments/14f6frv/podman_automatically_sets_cniversion_100_instead/)
+
+#### 공유 마운트 문제
+- Docker 에서 Podman 으로 마이그레이션 시 공유 마운트가 정상적으로 동작하지 않는 경우가 발생할 수 있다
+```Bash
+WARN[0000] "/" is not a shared mount, this could cause issues or missing mounts with rootless containers
+```
+- Podman 은 기본적으로 rootless 모드로 실행되기 때문에 root 권한이 없어도 컨테이너를 관리할 수 있다.
+- Podman 은 컨테이너를 실행할 때 컨테이너의 루트 디렉토리를 호스트의 루트 디렉토리와 공유하지 않는다.
+- 이를 위해 마운트 설정이 필요한데, 이가 누락되었을 경우 발생한다
+- [참조](https://github.com/containers/buildah/issues/3726)
+```Bash
+findmnt -o PROPAGATION /
+# or 
+sudo mount --make-rshared /
+```
+
+
 ## podman 명령어 {id="podman_5"}
 
 ```bash
