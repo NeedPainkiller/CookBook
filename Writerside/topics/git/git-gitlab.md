@@ -12,8 +12,7 @@ services:
     image: 'gitlab/gitlab-ce:16.6.2-ce.0'
     container_name: gitlab
     restart: always
-    hostname: '127.0.0.1'
-    # hostname: 'gitlab.needpainkiller.xyz'
+     hostname: 'gitlab.needpainkiller.xyz'
     shm_size: '256m'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
@@ -22,13 +21,9 @@ services:
         # Add any other gitlab.rb configuration here, each on its own line
       TZ: 'Asia/Seoul'
     ports:
-      - '127.0.0.1:80:80'
-      - '127.0.0.1:443:443'
-      - '127.0.0.1:8022:22'
-    expose:
-      - "31080"
-      - "31443"
-      - "31022"
+      - '80:80'
+      - '443:443'
+      - '8022:22'
     volumes:
       - './gitlab/config:/etc/gitlab'
       - './gitlab/logs:/var/log/gitlab'
