@@ -16,7 +16,7 @@ java -version
 3. 압축 해제 후 환경변수 설정
 
 - `GRADLE_HOME` : Gradle 압축 해제 경로 (새 변수)
-- `Path` : `%GRADLE_HOME%\bin;` (시스템 - path 변수에 추가)
+- `Path` : &percnt;GRADLE_HOME&percnt;\bin; (시스템 - path 변수에 추가)
 
 4. 설치 확인
 
@@ -25,6 +25,38 @@ gradle -v
 ```
 
 ## Gradle 업그레이드 {#gradle-upgrade}
+
+1. Gradle Wrapper 생성
+```Bash
+gradle wrapper
+```
+
+2. (옵션1) Gradle Wrapper 경로 (gradle/wrapper/gradle-wrapper.properties) 에서 버전 변경
+
+- gradle/wrapper/gradle-wrapper.properties 파일 > distributionUrl 변경
+```Bash
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+```
+- gradlew.bat 실행
+```Bash
+gradlew.bat build 
+```
+
+2. (옵션2) Gradle Wrapper 명령어로 버전 변경
+
+```Bash
+gradlew wrapper --gradle-version <version>
+```
+- gradlew.bat 실행
+```Bash
+gradlew.bat build 
+```
 
 <seealso>
     <category ref="official">
