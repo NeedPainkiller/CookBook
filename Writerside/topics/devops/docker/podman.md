@@ -263,7 +263,7 @@ Error: error creating tmpdir: mkdir /run/user/1000: permission denied
 ```
 - systemd 가 비활성화 된 환경에서 (WSL) 등 사용자 세션을 유지하지 않는 환경에서 발생한다
 - podman 의 사용자 세션은 /run/user/UID 디렉토리에 의존하는데 이 세션을 읽는데 문제가 발생하는 것이다
-
+[참고](https://github.com/containers/podman/issues/9002)
 ```Bash
 loginctl enable-linger my_ci_user
 ```
