@@ -28,6 +28,9 @@
             <toc-element topic="podman.md"/>
             <toc-element topic="docker-safe-image.md"/>
             <toc-element topic="k8s.md"/>
+            <toc-element topic="docker-services-index.md">
+                <toc-element topic="docker-services-portainer.md"/>
+            </toc-element>
         </toc-element>
     </toc-element>
     <toc-element topic="git-index.md">
