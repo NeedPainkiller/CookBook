@@ -40,8 +40,6 @@ services:
       --sslcert /certs/fullchain.pem
       --sslkey /certs/privkey.pem
 ```
-
-
 <seealso>
   <category ref="official">
     <a href="https://www.portainer.io/">Portainer</a>

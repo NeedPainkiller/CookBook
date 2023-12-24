@@ -26,19 +26,19 @@ get_value() {
     local key=$2
 
     value=$(grep "^$key=" "$file_path" | cut -d= -f2)
-    echo $value
+    echo "$value"
 }
 
 # 인증서 만료일 조회
 get_expire_date() {
-    cert_file_path = $1
+    cert_file_path=$1
     expire_date=$(openssl x509 -in "$cert_file_path" -noout -enddate | cut -d= -f2)
-    echo $expire_date
+    echo "$expire_date"
 }
 
 # 인증서 만료일 이 30일 이하인지 확인
 is_expire_soon() {
-    cert_file_path = $1
+    cert_file_path=$1
     expire_date=$(get_expire_date "$cert_file_path")
     expire_date_timestamp=$(date -d "$expire_date" +%s)
     now_timestamp=$(date +%s)
@@ -72,20 +72,22 @@ DOMAIN=$(get_value "$secret_file_path" "DOMAIN")
 # .secret > ADMIN_EMAIL=yourmail@mail.com
 ADMIN_EMAIL=$(get_value "$secret_file_path" "ADMIN_EMAIL")
 # .secret > SECRET_AWS_ROUTE53_KEY=AWS IAM KEY
-export SECRET_AWS_ROUTE53_KEY=$(get_value "$secret_file_path" "SECRET_AWS_ROUTE53_KEY")
 # .secret > SECRET_AWS_ROUTE53_SECRET=AWS IAM SECRET
-export SECRET_AWS_ROUTE53_SECRET=$(get_value "$secret_file_path" "SECRET_AWS_ROUTE53_SECRET")
+export SECRET_AWS_ROUTE53_KEY
+export SECRET_AWS_ROUTE53_SECRET
+SECRET_AWS_ROUTE53_KEY=$(get_value "$secret_file_path" "SECRET_AWS_ROUTE53_KEY")
+SECRET_AWS_ROUTE53_KEY=$(get_value "$secret_file_path" "SECRET_AWS_ROUTE53_SECRET")
 
 echo "DOMAIN : $DOMAIN | ADMIN_EMAIL : $ADMIN_EMAIL"
 
 # remove a previous dir
-sudo rm -rf ${CERT_DIR}/letsencrypt
+sudo rm -rf "${CERT_DIR}"/letsencrypt
 
 # generate ssl certs
-${CERT_DIR}/certbot.sh ${DOMAIN} ${ADMIN_EMAIL} > ${CERT_DIR}/certbot.log 2>&1
+"${CERT_DIR}"/certbot.sh "${DOMAIN}" "${ADMIN_EMAIL}" > "${CERT_DIR}"/certbot.log 2>&1
 
 # chown certs to USER_NAME
-sudo chown ${USER}:${USER} ${CERT_DIR}/ssl.*
+sudo chown "${USER}":"${USER}" "${CERT_DIR}"/ssl.*
 
 # Restart Nginx
 # ${CERT_DIR}/restart-nginx.sh >> ${CERT_DIR}/certbot.log 2>&1
