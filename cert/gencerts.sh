@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 경로를 합치는 함수 정의
+# 경로를 합치는 함수
 join_paths() {
     local path1=$1
     local path2=$2
@@ -85,6 +85,13 @@ sudo rm -rf "${CERT_DIR}"/letsencrypt
 
 # generate ssl certs
 "${CERT_DIR}"/certbot.sh "${DOMAIN}" "${ADMIN_EMAIL}" > "${CERT_DIR}"/certbot.log 2>&1
+
+PUBLIC_KEY_PATH=${CERT_DIR}/ssl.crt
+PRIVATE_KEY_PATH=${CERT_DIR}/ssl.key
+BOTH_KEY_PATH=${CERT_DIR}/ssl.pem
+
+# generate p12 from ssl.crt and ssl.key
+openssl pkcs12 -export -name "${DOMAIN}" -certfile "${PUBLIC_KEY_PATH}" -in "${PUBLIC_KEY_PATH}" -inkey "${PRIVATE_KEY_PATH}" -out "${CERT_DIR}"/ssl.p12 -password pass:password
 
 # chown certs to USER_NAME
 sudo chown "${USER}":"${USER}" "${CERT_DIR}"/ssl.*
