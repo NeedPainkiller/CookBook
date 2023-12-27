@@ -10,6 +10,14 @@ cat /etc/os-release
 
 lsb_release -a
 ```
+- 시스템 환경 확인
+```bash
+cat /proc/cpuinfo
+cat /proc/meminfo
+free -m
+df -h
+```
+
 
 ### ubuntu 20.04 > 22.04 업그레이드 {collapsible="true"}
 
