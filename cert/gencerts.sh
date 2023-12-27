@@ -66,8 +66,7 @@ if [ $(is_file_exists "$secret_file_path") = "false" ]; then
     exit 1
 fi
 
-exit 0
-# .secret > *.aaa.bbb
+ # .secret > DOMAIN=*.aaa.bbb
 DOMAIN=$(get_value "$secret_file_path" "DOMAIN")
 # .secret > ADMIN_EMAIL=yourmail@mail.com
 ADMIN_EMAIL=$(get_value "$secret_file_path" "ADMIN_EMAIL")
@@ -88,10 +87,18 @@ sudo rm -rf "${CERT_DIR}"/letsencrypt
 
 PUBLIC_KEY_PATH=${CERT_DIR}/ssl.crt
 PRIVATE_KEY_PATH=${CERT_DIR}/ssl.key
-BOTH_KEY_PATH=${CERT_DIR}/ssl.pem
+PEM_KEY_PATH=${CERT_DIR}/ssl.pem
+P12_KEY_PATH=${CERT_DIR}/ssl.p12
+PFX_KEY_PATH=${CERT_DIR}/ssl.pfx
+
+# .secret > SECRET_PKCS_PASSWORD=PKCS PASSWORD
+SECRET_PKCS_PASSWORD=$(get_value "$secret_file_path" "SECRET_PKCS_PASSWORD")
 
 # generate p12 from ssl.crt and ssl.key
-openssl pkcs12 -export -name "${DOMAIN}" -certfile "${PUBLIC_KEY_PATH}" -in "${PUBLIC_KEY_PATH}" -inkey "${PRIVATE_KEY_PATH}" -out "${CERT_DIR}"/ssl.p12 -password pass:password
+openssl pkcs12 -export -name "${DOMAIN}" -certfile "${PUBLIC_KEY_PATH}" -in "${PUBLIC_KEY_PATH}" -inkey "${PRIVATE_KEY_PATH}" -out "${P12_KEY_PATH}" -password pass:"${SECRET_PKCS_PASSWORD}"
+
+# generate pfx from ssl.crt and ssl.key
+openssl pkcs12 -export -certfile "${PUBLIC_KEY_PATH}" -in "${PUBLIC_KEY_PATH}" -inkey "${PRIVATE_KEY_PATH}" -out "${PFX_KEY_PATH}" -password pass:"${SECRET_PKCS_PASSWORD}
 
 # chown certs to USER_NAME
 sudo chown "${USER}":"${USER}" "${CERT_DIR}"/ssl.*
