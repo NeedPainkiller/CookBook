@@ -37,8 +37,8 @@ services:
       - /home/sammy/docker/site/ssl:/certs:ro
     command:
       --ssl
-      --sslcert /certs/fullchain.pem
-      --sslkey /certs/privkey.pem
+      --sslcert /certs/ssl.crt
+      --sslkey /certs/ssl.key
 ```
 <seealso>
   <category ref="official">
