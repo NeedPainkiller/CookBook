@@ -246,13 +246,26 @@ sudo chown ${USER}:${USER} ${CERT_DIR}/ssl.*
 
 ### 인코딩 
 
-- der
+- .der
   - Distinguished Encoding Representation (DER)
-  - 바이너리 DER 형식으로 인코딩된 인증서. 텍스트 편집기에서 열었는데 읽어들일 수 없다면 이 인코딩일 확률이 높다.
-- pem
-  - X.509 v3 파일의 한 형태
-  - PEM (Privacy Enhanced Mail)은 Base64인코딩된 ASCII text file이다.
-  - 원래는 secure email에 사용되는 인코딩 포멧이었는데 더이상 email쪽에서는 잘 쓰이지 않고 인증서 또는 키값을 저장하는데 많이 사용된다.
-  - -----BEGIN XXX-----, -----END XXX----- 로 묶여있는 text file을 보면 이 형식으로 인코딩 되어있다고 생각하면 된다. (담고있는 내용이 무엇인지에 따라 XXX 위치에 CERTIFICATE, RSA PRIVATE KEY 등의 키워드가 들어있다)
+  - 바이너리 DER 형식으로 인코딩된 인증서
+  - 인증서를 인코딩하는 방식 중 하나로 인코딩된 인증서는 바이너리 형태로 저장되어있어서 인코딩된 인증서를 열어보면 이해할 수 없는 문자열이 나온다.
+- .pem
+  - Privacy Enhanced Mail (PEM)
+  - Base64인코딩된 ASCII text file
+  - X.509 v3 파일의 한 형태 (X.509 v3은 인증서의 표준 형식)
+  - 본래 secure email 에 사용되는 인코딩 포멧이었는데 본 용도로 쓰지 않고 인증서 또는 키값을 저장하는데 많이 사용된다.
+  - -----BEGIN XXX-----, -----END XXX-----로 묶여 있으며, 담고있는 내용이 무엇인지에 따라 XXX 위치에 CERTIFICATE, RSA PRIVATE KEY 등의 키워드가 들어있다
   - 인증서(Certificate = public key), 비밀키(private key), 인증서 발급 요청을 위해 생성하는 CSR (certificate signing request) 등을 저장하는데 사용된다.
 
+### 확장자
+- .crt, .cer
+  - 인증서를 나타내는 확장자
+  - CER 과 CRT 는 같은 기능을 하지만, CER은 주로 윈도우에서 사용되고, CRT는 유닉스 계열에서 사용된다.
+  - 인코딩 형식은 DER, PEM 두가지가 사용되지만, 파일 명 만으로는 어떤 인코딩 형식인지 알 수 없다.
+- .key
+  - 개인 또는 공개 PKCS#8 키
+- .p12
+  - PKCS#12 형식, 하나 또는 그이상의 certificate(public)과 그에 대응하는 private key를 포함하고 있는 key store 파일이며 패스워드로 암호화 되어있다. 열어서 내용을 확인하려면 패스워드가 필요하다.
+- .pfx
+  - PKCS#12는 Microsoft의 PFX파일을 계승하여 만들어진 포멧이라 pfx와 p12를 구분없이 동일하게 사용하기도 한다.
