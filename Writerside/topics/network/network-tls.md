@@ -242,3 +242,17 @@ sudo chown ${USER}:${USER} ${CERT_DIR}/ssl.*
 # Run gencerts.sh at 00:00 on every 1st day of a month
 0 0 1 * * /.../gencerts.sh
 ```
+## 인증서 파일 형식의 차이점
+
+### 인코딩 
+
+- der
+  - Distinguished Encoding Representation (DER)
+  - 바이너리 DER 형식으로 인코딩된 인증서. 텍스트 편집기에서 열었는데 읽어들일 수 없다면 이 인코딩일 확률이 높다.
+- pem
+  - X.509 v3 파일의 한 형태
+  - PEM (Privacy Enhanced Mail)은 Base64인코딩된 ASCII text file이다.
+  - 원래는 secure email에 사용되는 인코딩 포멧이었는데 더이상 email쪽에서는 잘 쓰이지 않고 인증서 또는 키값을 저장하는데 많이 사용된다.
+  - -----BEGIN XXX-----, -----END XXX----- 로 묶여있는 text file을 보면 이 형식으로 인코딩 되어있다고 생각하면 된다. (담고있는 내용이 무엇인지에 따라 XXX 위치에 CERTIFICATE, RSA PRIVATE KEY 등의 키워드가 들어있다)
+  - 인증서(Certificate = public key), 비밀키(private key), 인증서 발급 요청을 위해 생성하는 CSR (certificate signing request) 등을 저장하는데 사용된다.
+
