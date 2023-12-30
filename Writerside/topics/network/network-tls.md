@@ -258,6 +258,20 @@ sudo chown ${USER}:${USER} ${CERT_DIR}/ssl.*
   - -----BEGIN XXX-----, -----END XXX-----로 묶여 있으며, 담고있는 내용이 무엇인지에 따라 XXX 위치에 CERTIFICATE, RSA PRIVATE KEY 등의 키워드가 들어있다
   - 인증서(Certificate = public key), 비밀키(private key), 인증서 발급 요청을 위해 생성하는 CSR (certificate signing request) 등을 저장하는데 사용된다.
 
+#### 인코딩 변환
+- DER -> PEM
+```Bash
+openssl x509 -inform der -in certificate.cer -out certificate.pem 
+```
+
+- PEM -> DER
+```Bash
+openssl x509 -outform der -in certificate.pem -out certificate.der
+
+# 암호화 없는 DER 로 변환하려면 아래 명령어 사용
+openssl pkcs8 -topk8 -inform PEM -outform DER -in private.key -out private.der -nocrypt 
+```
+
 ### 확장자
 - .crt, .cer
   - 인증서를 나타내는 확장자
@@ -269,3 +283,82 @@ sudo chown ${USER}:${USER} ${CERT_DIR}/ssl.*
   - PKCS#12 형식, 하나 또는 그이상의 certificate(public)과 그에 대응하는 private key를 포함하고 있는 key store 파일이며 패스워드로 암호화 되어있다. 열어서 내용을 확인하려면 패스워드가 필요하다.
 - .pfx
   - PKCS#12는 Microsoft의 PFX파일을 계승하여 만들어진 포멧이라 pfx와 p12를 구분없이 동일하게 사용하기도 한다.
+
+## 인증서 표준
+|표준 | 설명                                                                 |
+|-----|--------------------------------------------------------------------|
+|X.509 | 인증서의 표준 형식                                                         |
+|PKCS#5 | 비밀번호 기반의 암호화를 위해 사용되는 표준 형식                                        |
+|PKCS#7 | 인증서 체인을 저장하는데 사용되는 표준 형식                                           |
+|PKCS#8 | 개인 키를 저장하는데 사용되는 표준 형식, PEM 인코딩을 사용                                |
+|PKCS#10 | 인증서 발급 요청을 저장하는데 사용되는 표준 형식|
+|PKCS#12 | 인증서와 개인 키를 저장하는데 사용되는 표준 형식, 단일 파일에 여러 인증서 정보를 합쳐 보관하는 방식에 대한 표준이다 |
+
+- X.509
+  - public key infrastructure (PKI)에 대한 ITU-T의 표준 (RFC 5280)
+  - 공개키(public key) 인증서의 format, revocation list(더이상 유효하지 않은 인증서들에 대한 정보 배포), certification path(chain) validation 알고리즘 등을 정의
+  - 보통 X.509 인증서라 하면 RFC 5280에 따라서 인코딩되거나 서명된 디지털 문서를 의미
+  - X.509 인증서는 인증서의 발급자, 유효 기간, 공개키, 서명 알고리즘 등의 정보를 포함하고 있다.
+  - X.509 인증서는 DER 형식 또는 PEM 형식으로 인코딩된다.
+
+### PKCS Padding
+
+#### PKCS5Padding, PKCS7Padding
+- 대칭키 알고리즘(ex: AES)을 사용 할 때 암호화 하려는 데이터의 길이가 긴 경우 ECB (Electronic Codebook), CBC(Cipher Block Chain) 등의 block cipher 방식을를 사용해서 데이터를 암호화 하게된다. 
+- 블록단위로 잘라서 암호화/복호화가 진행되기 때문에 정해진 마지막 블록의 사이즈와 실제 데이터의 크기가 맞지 않는 경우가 생길 수 있다. 
+- 이때 마지막 블록의 빈 공간을 채워넣는(padding) 방식을 말한다.
+
+##### 예시
+- 예를 들어 데이터가 17바이트인데 block size가 8바이트라면 총 3개의 블록이 필요하고 마지막 블록은 7바이트가 남기때문에 이부분을 특정 값으로 채워넣어서 암호화를 진행한다.
+- PKCS5Padding과 PKCS7Padding 둘다 빈 공간에 값을 채워넣는 규칙은 다음과 같다.
+  - 마지막 블록에 1바이트가 남는다면 01을 채워넣고 (01은 1바이트를 16진수 표기한 값)
+  - 마지막 블록에 2바이트가 남는다면 02 02를 채워넣음
+  - 마지막 블록에 3바이트가 남는다면 03 03 03를 채워넣음
+- 대신 PKCS5Padding과 PKCS7Padding의 경우 block size의 제약 조건이 다르다.
+  - PKCS5Padding의 경우 block size 8바이트로 고정
+  - PKCS7Padding의 경우 block size 최대 255바이트까지 지원
+
+#### PKCS1Padding
+- PKCS1Padding는 앞서말한 PKCS5Padding/PKCS7Padding과는 방식도 다르고 사용처도 다르다
+- PKCS1Padding는 보통 RSA 알고리즘과 같이 사용되며 PKCS#1 v1.5 에 명시된 padding 방법을 사용한다.
+- PKCS1Padding의 경우 block size의 제약 조건이 없다.
+
+##### 예시
+- PKCS1Padding의 경우 마지막 블록의 빈 공간을 채워넣는 규칙은 다음과 같다.
+  - 마지막 블록의 첫 바이트는 0x00
+  - 마지막 블록의 두번째 바이트는 0x02
+  - 마지막 블록의 세번째 바이트부터는 0x00이 아닌 임의의 값이 들어간다.
+- Encryption Block 구성 = 00 || Block Type || Padding || 00 || Data
+- 최소 11바이트의 패딩이 추가된다. (오버헤드가 크다) 이 중 8바이트는 1~255 사이의 랜덤 값으로 채워진다.
+- 이런 랜덤 특성 때문에 동일한 데이터를 암호화 해도 매번 다른 결과가 나온다.
+- RSA의 특성상 보통 content전체를 암호화하는데 사용되지 않고, content를 암호화 하는데 사용한 content key(private key)를 암호화 하기 위한 수단으로 사용되기 때문에 메세지의 크기가 늘어나는 패딩 오버헤드는 크게 문제되지 않는다.
+
+#### Crpyto Library in Java
+- Java에서 제공하는 Crypto 라이브러리의 경우 Cipher.getInstance(“algorithm/mode/padding”) 형식의 스트링으로 암호화 알고리즘, 모드, 패딩방식을 결정할 수 있다. 
+- 참고로 데이터의 길이가 길어서 (블럭의 갯수가 하나 이상)인 경우 ECB는 보안성이 취약하니 CBC를 꼭 사용해야 한다. (각 블럭의 데이터가 섞이지 않은 상태로 동일한 암호화를 적용하면 데이터에 패턴이 나타나게됨)
+
+##### 예시
+- “RSA/ECB/PKCS1Padding” (참고: 이 방식은 1개의 블록만 암호화 할 수 있도록 구현되어있기 때문에 실제로는 ECB라고 부를 수 없다.)
+- “AES/ECB/PKCS5Padding “
+- “AES/CBC/PKCS5Padding “
+- “AES/ECB/PKCS7Padding “
+- “AES/CBC/PKCS7Padding ”
+
+
+## 인증서 발급기관 (CA)
+- 인증서 발급기관 (Certificate Authority, CA)은 인증서를 발급하는 기관을 의미합니다.
+- 인증서 발급기관은 인증서를 발급하는 것 외에도 인증서의 유효성을 검증하는 역할도 수행합니다.
+
+<seealso>
+<category ref="reference">
+<a href="https://www.letmecompile.com/certificate-file-format-extensions-comparison/">인증서 파일 형식 및 확장자의 차이점 비교 설명 (Certificate file format & extensions)</a>
+<a href="https://datatracker.ietf.org/doc/html/rfc5280">RFC 5280: Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile</a>
+<a href="https://datatracker.ietf.org/doc/html/rfc2313">PKCS #1: RSA Encryption Version 1.5</a>
+<a href="https://datatracker.ietf.org/doc/html/rfc2315">PKCS #7: Cryptographic Message Syntax</a>
+<a href="https://datatracker.ietf.org/doc/html/rfc5208">PKCS #8: Private-Key Information Syntax Specification</a>
+<a href="https://datatracker.ietf.org/doc/html/rfc7292">PKCS #12: Personal Information Exchange Syntax Standard</a>
+<a href="https://www.openssl.org/docs/manmaster/man1/pkcs8.html">OpenSSL PKCS8</a>
+<a href="https://www.openssl.org/docs/manmaster/man1/rsa.html">OpenSSL RSA</a>
+<a href="https://crypto.stackexchange.com/questions/25899/using-ecb-as-rsa-encryption-mode-when-encrypted-messages-are-unique">using-ecb-as-rsa-encryption-mode</a>
+</category>
+</seealso>
