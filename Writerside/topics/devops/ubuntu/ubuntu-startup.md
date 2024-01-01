@@ -112,7 +112,7 @@ df -h
     <step>
         <p>필수 패키지 설치</p>
         <code-block lang="bash"> 
-            sudo apt install -y openssh-server curl wget net-tools tree language-pack-ko make gcc pkg-config ca-certificates gnupg ufw gnome-terminal lsb-release apt-transport-https ufw gnome-terminal lsb-release apt-transport-https zip 
+            sudo apt install -y openssh-server curl wget net-tools tree language-pack-ko make gcc pkg-config ca-certificates gnupg ufw gnome-terminal lsb-release apt-transport-https ufw gnome-terminal lsb-release apt-transport-https zip rsync
         </code-block>
     </step>
 </procedure>

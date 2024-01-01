@@ -40,7 +40,7 @@ rsync options src dest
 --delete # 서버 쪽에는 없고 클라이언트에만 있는 파일은 지운다.
 --devices # 디바이스 파일을 보존한다(슈퍼유저만 해당).
 --existing # 추가된 파일은 전송하지 않고 업데이트된 파일만 전송한다.
---exclude # 풀필요한 파일을 제외한다.
+--exclude # 불필요한 파일을 제외한다.
 --no-motd # 데몬 모드(MOTD)를 출력하지 않는다.
 --specials #: 스페셜 파일을 보존한다.
 --suffix # 디렉터리(SUFFIX) 위치에 백업한다.
