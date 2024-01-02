@@ -16,7 +16,7 @@ java -version
 3. 압축 해제 후 환경변수 설정
 
 - `GRADLE_HOME` : Gradle 압축 해제 경로 (새 변수)
-- `Path` : &percnt;GRADLE_HOME&percnt;\bin; (시스템 - path 변수에 추가)
+- `Path` : &percnt;\GRADLE_HOME&percnt;\bin; (시스템 - path 변수에 추가)
 
 4. 설치 확인
 

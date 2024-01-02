@@ -2,7 +2,7 @@
 
 ## 개요 {id="kubernetes_1"}
 
-<img src="k8s_world.png" alt=""/>
+
 <img src="k8s_ecosystem.png" alt=""/>
 
 <seealso>
