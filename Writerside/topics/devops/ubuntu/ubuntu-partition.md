@@ -888,6 +888,30 @@ I/O size (minimum/optimal): 512 bytes / 512 bytes
     </step>
 </procedure>
 
+## 파티션 포맷
+- 예시
+```Bash
+sudo mkfs.ext4 /dev/sdb1
+```
+
+## 논리 볼륨 및 그룹 삭제
+- 논리 볼륨 삭제
+```Bash
+sudo lvremove /dev/VolGroup00/Vol00
+```
+
+- 논리 볼륨 그룹 삭제
+```Bash
+sudo vgremove VolGroup00
+```
+
+- 물리적 볼륨 삭제
+```Bash
+sudo pvremove /dev/sda1
+```
+
+
+
 ## 번외 {id="ubuntu_partition_99"}
 ### /dev 디렉터리는 무엇인가? {id="ubuntu_partition_99_1"}
 - Linux는 전통적으로 모든 것을 읽거나 쓸 수 있는 파일이나 디렉터리로 취급한다
