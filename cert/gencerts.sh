@@ -75,7 +75,7 @@ ADMIN_EMAIL=$(get_value "$secret_file_path" "ADMIN_EMAIL")
 export SECRET_AWS_ROUTE53_KEY
 export SECRET_AWS_ROUTE53_SECRET
 SECRET_AWS_ROUTE53_KEY=$(get_value "$secret_file_path" "SECRET_AWS_ROUTE53_KEY")
-SECRET_AWS_ROUTE53_KEY=$(get_value "$secret_file_path" "SECRET_AWS_ROUTE53_SECRET")
+SECRET_AWS_ROUTE53_SECRET=$(get_value "$secret_file_path" "SECRET_AWS_ROUTE53_SECRET")
 
 echo "DOMAIN : $DOMAIN | ADMIN_EMAIL : $ADMIN_EMAIL"
 
@@ -98,7 +98,7 @@ SECRET_PKCS_PASSWORD=$(get_value "$secret_file_path" "SECRET_PKCS_PASSWORD")
 openssl pkcs12 -export -name "${DOMAIN}" -certfile "${PUBLIC_KEY_PATH}" -in "${PUBLIC_KEY_PATH}" -inkey "${PRIVATE_KEY_PATH}" -out "${P12_KEY_PATH}" -password pass:"${SECRET_PKCS_PASSWORD}"
 
 # generate pfx from ssl.crt and ssl.key
-openssl pkcs12 -export -certfile "${PUBLIC_KEY_PATH}" -in "${PUBLIC_KEY_PATH}" -inkey "${PRIVATE_KEY_PATH}" -out "${PFX_KEY_PATH}" -password pass:"${SECRET_PKCS_PASSWORD}
+openssl pkcs12 -export -certfile "${PUBLIC_KEY_PATH}" -in "${PUBLIC_KEY_PATH}" -inkey "${PRIVATE_KEY_PATH}" -out "${PFX_KEY_PATH}" -password pass:"${SECRET_PKCS_PASSWORD}"
 
 # chown certs to USER_NAME
 sudo chown "${USER}":"${USER}" "${CERT_DIR}"/ssl.*
