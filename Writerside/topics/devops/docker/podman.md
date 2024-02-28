@@ -275,6 +275,35 @@ sudo sh -c "echo 0 > /proc/sys/net/ipv4/ip_unprivileged_port_start"
 ```
 [참고](https://github.com/containers/podman/issues/3212#issuecomment-523311734)
 
+### /run/docker.sock 사용
+- Docker 와 호환성을 위해 /run/docker.sock 을 사용하는 경우
+```Bash
+sudo ln -s /run/podman/podman.sock /run/docker.sock
+```
+또는
+- 현재 사용자의 podman.sock 을 사용하는 것이 좋다
+```yaml
+# 예시
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    networks:
+      - podman-bridge
+    expose:
+      - 9443
+    volumes:
+      - /run/user/1002/podman/podman.sock:/var/run/docker.sock
+      - ./portainer:/data
+      - ./cert/ssl.pem:/certs/ssl.pem:ro
+      - ./cert/ssl.key:/certs/ssl.key:ro
+    command:
+      --ssl
+      --sslcert /certs/ssl.pem
+      --sslkey /certs/ssl.key
+```
+
+
 ## podman 명령어 {id="podman_5"}
 
 ```bash
