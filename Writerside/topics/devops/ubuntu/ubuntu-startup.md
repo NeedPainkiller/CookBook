@@ -112,7 +112,7 @@ df -h
     <step>
         <p>필수 패키지 설치</p>
         <code-block lang="bash"> 
-            sudo apt install -y openssh-server curl wget net-tools tree language-pack-ko make gcc pkg-config ca-certificates gnupg ufw gnome-terminal lsb-release apt-transport-https ufw gnome-terminal lsb-release apt-transport-https zip rsync
+            sudo apt install -y openssh-server curl wget net-tools ethtool wakeonlan tree language-pack-ko make gcc pkg-config ca-certificates gnupg ufw gnome-terminal lsb-release apt-transport-https ufw gnome-terminal lsb-release apt-transport-https zip rsync
         </code-block>
     </step>
 </procedure>
@@ -325,6 +325,7 @@ sudo adduser nobody
             gpasswd -d 사용자ID wheel
             ## 그룹 확인
             groups 사용자ID
+            usermod -aG sudo username
         </code-block>
     </step>
     <step>
@@ -353,6 +354,21 @@ sudo adduser nobody
 ```bash
 sudo reboot now
 ```
+
+#### rootless 계정의 port 권한 조정    
+
+```bash
+# 권한 부여
+sudo su root 
+setcap cap_net_bind_service=+ep '프로그램 경로'
+
+# 확인
+getcap '프로그램 경로'
+
+# 삭제
+setcap -r '프로그램 경로'
+```
+
 
 #### iptables 설정 (deprecated)
 
