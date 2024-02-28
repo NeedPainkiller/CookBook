@@ -117,7 +117,7 @@ podman-compose version
 
 ```Bash
 # 위 설치 후 수행 할 것
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
 ```
@@ -268,6 +268,12 @@ Error: error creating tmpdir: mkdir /run/user/1000: permission denied
 loginctl enable-linger my_ci_user
 ```
 
+
+### Rootless 에서의 80,443 포트 사용 
+```Bash
+sudo sh -c "echo 0 > /proc/sys/net/ipv4/ip_unprivileged_port_start"
+```
+[참고](https://github.com/containers/podman/issues/3212#issuecomment-523311734)
 
 ## podman 명령어 {id="podman_5"}
 
