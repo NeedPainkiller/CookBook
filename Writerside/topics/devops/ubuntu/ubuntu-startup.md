@@ -355,6 +355,34 @@ sudo adduser nobody
 sudo reboot now
 ```
 
+#### cloud-init 삭제
+- https://gist.github.com/zoilomora/f862f76335f5f53644a1b8e55fe98320
+
+- 우분투 시작 시 cloud-init 이 실행되어 장비 구동후 시간이 소요되는 경우가 있음
+- cloud-init 삭제 후 재부팅 할 것
+```Bash
+#sudo touch /etc/cloud/cloud-init.disabled
+#sudo dpkg-reconfigure cloud-init
+
+sudo apt-get purge cloud-init
+sudo rm -rf /etc/cloud/; sudo rm -rf /var/lib/cloud/
+sudo reboot now
+
+```
+
+```bash
+# 권한 부여
+sudo su root 
+setcap cap_net_bind_service=+ep '프로그램 경로'
+
+# 확인
+getcap '프로그램 경로'
+
+# 삭제
+setcap -r '프로그램 경로'
+```
+
+
 #### rootless 계정의 port 권한 조정    
 
 ```bash
