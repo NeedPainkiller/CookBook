@@ -275,6 +275,22 @@ sudo sh -c "echo 0 > /proc/sys/net/ipv4/ip_unprivileged_port_start"
 ```
 [참고](https://github.com/containers/podman/issues/3212#issuecomment-523311734)
 
+### Rootless 에서의 지속 가능한 컨테이너 실행
+- 일반 유저로 로그인 한 계정 에서  podman 을 rootless 모드에서 컨테이너를 실행하면 로그아웃시 컨테이너 도 같이 종료된다.
+- RedHat 에서는 systemd 를 통해 서비스를 생성, 관리하는것을 권장하고 있다
+  - [참고](https://access.redhat.com/documentation/ko-kr/red_hat_enterprise_linux/8/html/building_running_and_managing_containers/assembly_porting-containers-to-systemd-using-podman_building-running-and-managing-containers)
+  ```Bash
+  podman generate systemd --new --name [서비스명] [컨테이너_ID]
+  ```
+  - 하지만 이는 각각의 컨테이너마다 서비스를 생성해야 하기 때문에 번거롭다
+
+- 만약 장비를 재부팅시 컨테이너가 자동으로 실행되지 않아도 무관하다면 아래 명령어를 사용한다
+  - linger 륀 활성화하면 로그아웃시에도 사용자의 프로세스가 종료되지 않는다
+  ```Bash
+  sudo loginctl enable-linger [UID]
+  ```
+  - [참고](https://www.freedesktop.org/software/systemd/man/latest/loginctl.html)
+
 ### /run/docker.sock 사용
 - Docker 와 호환성을 위해 /run/docker.sock 을 사용하는 경우
 ```Bash
@@ -302,6 +318,7 @@ sudo ln -s /run/podman/podman.sock /run/docker.sock
       --sslcert /certs/ssl.pem
       --sslkey /certs/ssl.key
 ```
+
 
 
 ## podman 명령어 {id="podman_5"}
