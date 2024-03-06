@@ -14,6 +14,7 @@
         <toc-element topic="ubuntu-index.md">
             <toc-element topic="ubuntu-startup.md"/>
             <toc-element topic="ubuntu-partition.md"/>
+            <toc-element topic="ubuntu-ufw.md"/>
             <toc-element topic="ubuntu-wol.md"/>
             <toc-element topic="ubuntu-command-index.md">
                 <toc-element topic="ubuntu-command-rsync.md"/>
