@@ -21,12 +21,16 @@
             touch ~/.ssh
             touch ~/.ssh/id_rsa
             touch ~/.ssh/id_rsa.pub  
+            touch ~/.ssh/id_ed25519
+            touch ~/.ssh/id_ed25519.pub  
             touch ~/.ssh/authorized_keys
             touch ~/.ssh/known_hosts
             # .ssh 디렉터리 및 파일 권한 설정
             chmod 700 ~/.ssh
             chmod 600 ~/.ssh/id_rsa
             chmod 644 ~/.ssh/id_rsa.pub  
+            chmod 600 ~/.ssh/id_ed25519
+            chmod 644 ~/.ssh/id_ed25519.pub  
             chmod 644 ~/.ssh/authorized_keys
             chmod 644 ~/.ssh/known_hosts
         </code-block>
@@ -65,8 +69,15 @@
     </step>
 </procedure>
 
-### /etc/ssh/sshd_config 파일 설정 {id="ssh_1_1"} {collapsible="true"}
+## /etc/ssh/sshd_config 파일 설정 {id="ssh_1_1"}
+- 설정파일 수정 및 재시작
+```Bash
+sudo vi  vi /etc/ssh/sshd_config
+sudo systemctl restart sshd
+sudo systemctl status sshd
+```
 
+#### 패스워드 인증 사용 시 {id="ssh_1_1_1"} {collapsible="true"}
 ```bash
 # This is the sshd server system-wide configuration file.  See
 # sshd_config(5) for more information.
@@ -98,7 +109,8 @@ ListenAddress ::
 
 # Authentication:
 
-#LoginGraceTime 2m
+LoginGraceTime 1m
+PermitRootLogin no
 #PermitRootLogin prohibit-password
 #StrictModes yes
 #MaxAuthTries 6
@@ -191,6 +203,133 @@ Subsystem       sftp    /usr/lib/openssh/sftp-server
 #       ForceCommand cvs server
 ```
 
+
+#### 키 인증 사용 시 {id="ssh_1_1_2"} {collapsible="true"}
+```bash
+# This is the sshd server system-wide configuration file.  See
+# sshd_config(5) for more information.
+
+# This sshd was compiled with PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+
+# The strategy used for options in the default sshd_config shipped with
+# OpenSSH is to specify options with their default value where
+# possible, but leave them commented.  Uncommented options override the
+# default value.
+
+Include /etc/ssh/sshd_config.d/*.conf
+
+Port 10022
+#AddressFamily any
+ListenAddress 0.0.0.0
+ListenAddress ::
+
+#HostKey /etc/ssh/ssh_host_rsa_key
+#HostKey /etc/ssh/ssh_host_ecdsa_key
+#HostKey /etc/ssh/ssh_host_ed25519_key
+
+# Ciphers and keying
+#RekeyLimit default none
+
+# Logging
+#SyslogFacility AUTH
+#LogLevel INFO
+
+# Authentication:
+
+LoginGraceTime 1m
+PermitRootLogin no
+#PermitRootLogin prohibit-password
+#StrictModes yes
+#MaxAuthTries 6
+#MaxSessions 10
+
+PubkeyAuthentication yes
+
+# Expect .ssh/authorized_keys2 to be disregarded by default in future.
+AuthorizedKeysFile      .ssh/authorized_keys
+
+#AuthorizedPrincipalsFile none
+
+#AuthorizedKeysCommand none
+#AuthorizedKeysCommandUser nobody
+
+# For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+#HostbasedAuthentication no
+# Change to yes if you don't trust ~/.ssh/known_hosts for
+# HostbasedAuthentication
+#IgnoreUserKnownHosts no
+# Don't read the user's ~/.rhosts and ~/.shosts files
+#IgnoreRhosts yes
+
+# To disable tunneled clear text passwords, change to no here!
+PasswordAuthentication no
+#PermitEmptyPasswords no
+
+# Change to yes to enable challenge-response passwords (beware issues with
+# some PAM modules and threads)
+KbdInteractiveAuthentication no
+
+# Kerberos options
+#KerberosAuthentication no
+#KerberosOrLocalPasswd yes
+#KerberosTicketCleanup yes
+#KerberosGetAFSToken no
+
+# GSSAPI options
+#GSSAPIAuthentication no
+#GSSAPICleanupCredentials yes
+#GSSAPIStrictAcceptorCheck yes
+#GSSAPIKeyExchange no
+
+# Set this to 'yes' to enable PAM authentication, account processing,
+# and session processing. If this is enabled, PAM authentication will
+# be allowed through the KbdInteractiveAuthentication and
+# PasswordAuthentication.  Depending on your PAM configuration,
+# PAM authentication via KbdInteractiveAuthentication may bypass
+# the setting of "PermitRootLogin without-password".
+# If you just want the PAM account and session checks to run without
+# PAM authentication, then enable this but set PasswordAuthentication
+# and KbdInteractiveAuthentication to 'no'.
+UsePAM yes
+
+#AllowAgentForwarding yes
+#AllowTcpForwarding yes
+#GatewayPorts no
+X11Forwarding yes
+#X11DisplayOffset 10
+#X11UseLocalhost yes
+#PermitTTY yes
+PrintMotd no
+#PrintLastLog yes
+#TCPKeepAlive yes
+#PermitUserEnvironment no
+#Compression delayed
+#ClientAliveInterval 0
+#ClientAliveCountMax 3
+#UseDNS no
+#PidFile /run/sshd.pid
+#MaxStartups 10:30:100
+#PermitTunnel no
+#ChrootDirectory none
+#VersionAddendum none
+
+# no default banner path
+#Banner none
+
+# Allow client to pass locale environment variables
+AcceptEnv LANG LC_*
+
+# override default of no subsystems
+Subsystem       sftp    /usr/lib/openssh/sftp-server
+
+# Example of overriding settings on a per-user basis
+#Match User anoncvs
+#       X11Forwarding no
+#       AllowTcpForwarding no
+#       PermitTTY no
+#       ForceCommand cvs server
+```
+
 ## ssh 키 생성 {id="ssh_2"}
 
 ```bash
@@ -202,6 +341,42 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 - 이후 .ssh 의 ```id_ed25519``` 개인 키와 ```id_ed25519.pub``` 공개 키 생성됨
 - 개인 키, 공개 키 백업 필수
 - ```id_ed25519.pub``` 공개 키의 파일 내용을 복사하여 Github 등의 ssh 인증이 필요한 서비스에 등록하여 사용
+
+- Ed25519 암호 알고리즘을 사용하는 이유
+    - SHA-512 및 Curve25519를 사용한 EdDSA 서명 체계
+    - 빠른 단일 서명 확인 (Fast single-signature verification)
+    - 매우 빠른 배치 검증 (Even faster batch verification)
+    - 빠른 키 생성(Fast key generation)
+    - 높은 보안 수준(High security level)
+    - 완전 방지 세션 키(Foolproof session keys)
+    - 충돌 탄력성(Collision resilience)
+    - 비밀 배열 인덱스가 없음(No secret array indices)
+    - 비밀 지점 조건이 없음(No secret branch conditions)
+    - 작은 서명(Small signatures)
+    - 작은 키(Small keys)
+
+- Ed25519 암호 알고리즘을 사용하지 않는 이유
+    - Azure 및 AWS 일부 서비스에 호환성 문제가 있음
+  
+### 윈도우 환경에서의 사용 {id="ssh_2_1"} 
+- id_ed25519 파일을 그대로 사용  > 개인키 파일의 내용을 복사하여 사용할 것
+- 키 파일의 권한은 상속을 모두 해제 하고 "읽기", "읽기/실행" 권한만 부여
+- ```-----END OPENSSH PRIVATE KEY-----``` 다음열에 개행 추가 할 것 (인코딩 이슈)
+- puttygen 등의 프로그램을 사용하여 ppk 파일로 변환하여 사용 
+- authorized_keys 파일을 생성하여 공개키를 등록
+```bash
+cat ./id_ed25519.pub >> ./authorized_keys 
+```
+  - 접속 테스트
+```bash
+ssh [user]@[host] -p [port] -i [ppk file]
+```
+
+## ssh 접속 {id="ssh_3"}
+
+```bash
+ssh -i ~/.ssh/id_ed25519 user@host -p 10022
+```
 
 #### Ed25519 암호 알고리즘을 사용하는 이유 {collapsible="true"}
 

@@ -284,6 +284,8 @@ touch ~/.ssh/known_hosts
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/id_rsa
 chmod 644 ~/.ssh/id_rsa.pub  
+chmod 600 ~/.ssh/id_ed25519
+chmod 644 ~/.ssh/id_ed25519.pub  
 chmod 644 ~/.ssh/authorized_keys
 chmod 644 ~/.ssh/known_hosts
 ```
@@ -346,6 +348,17 @@ sudo adduser nobody
         <p>로컬에서 root 비밀번호 재설정</p>
         <code-block lang="bash">
             passwd
+        </code-block>
+    </step>
+    <step>
+        <p>root ssh 접속 제한</p>
+        <code-block lang="bash">
+            vi /etc/ssh/sshd_config
+            #################
+            LoginGraceTime 1m
+            PermitRootLogin no
+            #################
+            systemctl restart sshd
         </code-block>
     </step>
 </procedure>
