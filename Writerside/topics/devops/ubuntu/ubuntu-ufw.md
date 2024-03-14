@@ -145,7 +145,12 @@ COMMIT
   # don't delete the 'COMMIT' line or these rules won't be processed
   COMMIT 
   ```
-
+- https://serverfault.com/questions/532569/how-to-do-port-forwarding-redirecting-on-debian
+```Bash
+iptables -A PREROUTING -t nat -i eth3 -p tcp --dport 1234 -j DNAT --to-destination 192.168.57.25:80
+iptables -A FORWARD -p tcp -d 192.168.57.25 --dport 80 -j ACCEPT
+iptables -A POSTROUTING -t nat -s 192.168.57.25 -o eth3 -j MASQUERADE
+```
 
 - UFW 재시작
 ```Bash

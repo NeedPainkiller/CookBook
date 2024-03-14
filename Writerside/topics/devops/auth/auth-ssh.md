@@ -378,20 +378,6 @@ ssh [user]@[host] -p [port] -i [ppk file]
 ssh -i ~/.ssh/id_ed25519 user@host -p 10022
 ```
 
-#### Ed25519 암호 알고리즘을 사용하는 이유 {collapsible="true"}
-
-- SHA-512 및 Curve25519를 사용한 EdDSA 서명 체계
-- 빠른 단일 서명 확인 (Fast single-signature verification)
-- 매우 빠른 배치 검증 (Even faster batch verification)
-- 빠른 키 생성(Fast key generation)
-- 높은 보안 수준(High security level)
-- 완전 방지 세션 키(Foolproof session keys)
-- 충돌 탄력성(Collision resilience)
-- 비밀 배열 인덱스가 없음(No secret array indices)
-- 비밀 지점 조건이 없음(No secret branch conditions)
-- 작은 서명(Small signatures)
-- 작은 키(Small keys)
-
 <seealso>
     <category ref="reference">
         <a href="https://jackcokebb.tistory.com/18">WSL 외부 접속 설정하기 - ssh, 포트포워딩</a>
