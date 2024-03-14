@@ -234,6 +234,7 @@ exit code: 125
 ```                        
 - "cniVersion": "1.0.0" 을 "cniVersion": "0.4.0" 으로 변경하면 에러가 발생하지 않는다.
 - [참조](https://www.reddit.com/r/podman/comments/14f6frv/podman_automatically_sets_cniversion_100_instead/)
+- https://bugs.launchpad.net/ubuntu/+source/libpod/+bug/2024394
 
 #### 공유 마운트 문제
 - Docker 에서 Podman 으로 마이그레이션 시 공유 마운트가 정상적으로 동작하지 않는 경우가 발생할 수 있다
@@ -318,8 +319,8 @@ sudo ln -s /run/podman/podman.sock /run/docker.sock
       --sslcert /certs/ssl.pem
       --sslkey /certs/ssl.key
 ```
-[Podman을 사용하여 컨테이너를 systemd로 포팅](https://access.redhat.com/documentation/ko-kr/red_hat_enterprise_linux/8/html/building_running_and_managing_containers/assembly_porting-containers-to-systemd-using-podman_building-running-and-managing-containers)
-[Autostarting Podman Containers](https://linuxhandbook.com/autostart-podman-containers/)
+- [Podman을 사용하여 컨테이너를 systemd로 포팅](https://access.redhat.com/documentation/ko-kr/red_hat_enterprise_linux/8/html/building_running_and_managing_containers/assembly_porting-containers-to-systemd-using-podman_building-running-and-managing-containers)
+- [Autostarting Podman Containers](https://linuxhandbook.com/autostart-podman-containers/)
 
 
 ## podman 명령어 {id="podman_5"}
