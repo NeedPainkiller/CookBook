@@ -25,6 +25,7 @@
         </toc-element>
         <toc-element topic="auth-index.md">
             <toc-element topic="auth-ssh.md"/>
+            <toc-element topic="auth-ssh-fail2ban.md"/>
             <toc-element topic="auth-pgp.md"/>
         </toc-element>
         <toc-element topic="docker-index.md">
