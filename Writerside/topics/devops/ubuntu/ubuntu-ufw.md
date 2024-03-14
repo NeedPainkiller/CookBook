@@ -1,4 +1,4 @@
-# UFW (Uncomplicated Firewall) 설정 {id="ufw"}
+# UFW (Uncomplicated Firewall) 설정
 
 ## 설명 {id="ufw_1"}
 - Linux 커널의 패킷 필터링 시스템 [Netfilter](https://netfilter.org/) 를 사용하는 방화벽
@@ -115,6 +115,38 @@ sudo vi /etc/ufw/before.rules
 -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 500
 COMMIT
 ```
+  - 예시
+  ```Bash
+  -A ufw-before-forward -i enp5s0 -p tcp -d 172.20.0.10 --dport 10080 -j ACCEPT
+  -A ufw-before-forward -i enp5s0 -p tcp -d 172.20.0.10 --dport 10443 -j ACCEPT
+  
+  COMMIT
+  
+  *nat
+  :PREROUTING ACCEPT [0:0]
+  #-A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 0.0.0.0:10080
+  #-A PREROUTING -p tcp --dport 443 -j DNAT --to-destination 0.0.0.0:10443
+  
+  #-A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 10080
+  #-A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 10443
+  
+  -A PREROUTING -i enp5s0 -p tcp --dport 80 -j DNAT --to-destination 172.20.0.10:10080
+  -A PREROUTING -i enp5s0 -p tcp --dport 443 -j DNAT --to-destination 172.20.0.10:10443
+  
+  #-A ufw-before-forward -i enp5s0 -p tcp -d 172.20.0.10 --dport 10080 -j ACCEPT
+  #-A ufw-before-forward -i enp5s0 -p tcp -d 172.20.0.10 --dport 10443 -j ACCEPT
+  
+  -A PREROUTING -p tcp --dport 53 -j REDIRECT --to-port 10053
+  -A PREROUTING -p udp --dport 53 -j REDIRECT --to-port 10053
+  -A PREROUTING -p udp --dport 67 -j REDIRECT --to-port 10067
+  -A PREROUTING -p tcp --dport 853 -j REDIRECT --to-port 10853
+  -A PREROUTING -p udp --dport 853 -j REDIRECT --to-port 10853
+  
+  # don't delete the 'COMMIT' line or these rules won't be processed
+  COMMIT 
+  ```
+
+
 - UFW 재시작
 ```Bash
 sudo ufw reload
