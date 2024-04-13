@@ -45,6 +45,7 @@
     </toc-element>
     <toc-element topic="network-index.md">
         <toc-element topic="network-tls.md"/>
+        <toc-element topic="network-tcp.md"/>
         <toc-element topic="network-nginx.md"/>
     </toc-element>
     <toc-element topic="db-index.md">
