@@ -43,7 +43,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_max_syn_backlog="1024"
 echo "net.ipv4.tcp_max_syn_backlog=1024" >> /etc/sysctl.conf
 ```
 
-- net.ipv4.tcp_syncookies, tcp_syn_retries, tcp_retries1
+- net.ipv4.tcp_syncookies, tcp_syn_retries, tcp_retries1 
     - 동일 client 에서 새로운 SYN 패킷을 수신받더라도 syn backlog queue 에 쌓지 않으므로 tcp_max_syn_backlog 설정에 도움이 된다.
     - 서비스가 부하가 클 경우 응답처리가 되지 않아 retry 들이 증가, 신규 요청을 처리할 수 없게 된다.
     - 이때 tcp_syn_retries 를 축소시킴으로서 신규 유입을 증가 시키고, 응답이 없을 시 불필요한 재시도를 줄이는 것이다.
@@ -273,7 +273,7 @@ cat /proc/mounts
 user www-data;
 
 worker_processes  auto;
-worker_rlimit_nofile 65535;
+worker_rlimit_nofile 65534;
 
 pid /run/nginx.pid;
 
@@ -319,6 +319,7 @@ sudo chown -R www-data: /var/www/xxx.com
 - 이 값은 worker_processes * worker_connections 값이 최대 동시 접속 가능한 클라이언트 수가 된다.
 - 시스템에서 사용 가능한 소켓 연결 수에 의해 제한되므로 이 값을 무한대로 설정하는 것은 의미가 없다.
 - 이 값은 서버의 메모리와 CPU 성능에 따라 적절한 값을 설정해야 한다.
+- nginx 에서 모든 소켓 연결은 파일 디스크립터로 표현되며, 이 값은 worker_rlimit_nofile 값보다 같거나 작아야 한다.
 - ulimit -n 명령어로 확인 가능하다
 
 ```Bash
@@ -453,6 +454,17 @@ map $http_upgrade $connection_upgrade {
     ''      close;
 }
 
+# 캐싱
+#proxy_buffering on;
+#proxy_buffer_size 4k;
+#proxy_buffers 8 4k;
+#proxy_cache_min_uses 1;
+#proxy_cache_methods HEAD, GET;
+#proxy_cache_key "$scheme$host$request_uri$cookie_user";
+
+#proxy_cache_valid 404 1m;
+#proxy_cache_valid 500 502 504 5m;
+#proxy_cache_valid 200 10;
 ```
 
 ### charset
@@ -629,6 +641,11 @@ map $status $loggable {
 access_log /var/log/nginx/access.log combined if=$loggable;
 ```
 #### error_log
+- error 로그는 off 가 불가능 하다
+- 만약 로그를 남기고 싶지 않다면 다음과 같이 설정할 수 있다.
+```NGINX
+error_log /dev/null emerg;
+```
 - 심각 한 오류만 로그
 ```NGINX
 error_log /var/log/nginx/www_error.log crit;
@@ -639,6 +656,17 @@ error_log /var/log/nginx/www_error.log crit;
 ```NGINX
 log_not_found off;
 ```
+
+### 캐시
+- 캐싱을 사용하면 클라이언트의 요청에 대한 응답을 캐시에 저장하여 다음 요청에 대한 응답을 빠르게 할 수 있다.
+- 캐시를 사용하면 서버의 부하를 줄일 수 있으나, 캐시를 사용할 때는 캐시의 유효 시간을 설정해야 한다.
+- HEAD, GET 은 기본 캐시 메소드로 설정되어 있다.
+- 정적 리소스 파일을 캐시하는 것은 권장하지만, upstream 을 이용한 reverse proxy 환경에서는 캐시를 사용하는 것을 권장하지 않으며, WAS 측에서 캐시를 사용하는 것이 좋다.
+- 일반적으로 정적 리소스 파일은 브라우저 측에서 캐시를 하고 있기 때문에 큰 성능 차이가 없을 수 있다.
+
+#### proxy_buffering
+- upstream 서버로 요청을 보내고 응답을 받을 때, 응답을 버퍼링할지 여부를 설정한다.
+- NGINX가 서버로부터 받은 응답을 내부 버퍼에 저장하고 있다가 전체 응답이 버퍼링될 때까지 클라이언트 측에 데이터 전송을 하지 않는다.
 
 ## upstream 영역
 
@@ -659,8 +687,14 @@ upstream backend  {
 - [참조](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#ip_hash)
 
 ### keepalive
-
 - upstream 서버와의 keepalive 연결 수를 지정한다.
+- upstream 서버에 대한 연결에 Nginx 는 기본적으로 HTTP/1.0 을 사용하므로 서버측 종료요청에 `Connection: close` 헤더를 보내게 된다.
+- 그렇게 되면 서버측에서는 keepalive 연결을 유지하지 않게 되어 다음 요청에 대해 다시 3-way-handshake 를 수행하게 되는데 keepalive 설정이 무의미해진다.
+- location 영역에서 아래 설정을 추가하여 keepalive 연결을 유지할 수 있다.
+```NGINX
+proxy_http_version 1.1;
+proxy_set_header "Connection" "";
+```
 
 ## location 영역
 - 웹 정적 리소스들 (이미지, CSS, JS 등)에 대한 access_log 를 비활성화 하는 것이 좋다.
@@ -669,6 +703,82 @@ location ~* \.(?:jpg|jpeg|gif|png|ico|woff2|js|css)$ {
   access_log off;
 }
 ```
+
+## DDOS 공격 대응
+- 일반적인 DDoS 방어와는 거리가 멀지만 소규모 DDos 공격을 방어하기 위한 설정을 적용할 수 있다.
+```NGINX
+# IP 당 연결 수 제한 (IP 당 10개의 연결을 허용)
+limit_conn_zone $binary_remote_addr zone=conn_limit_per_ip:10m;
+
+# IP & 시간 당 요청 수를 제한 (초당 30개의 요청을 허용)
+limit_req_zone $binary_remote_addr zone=req_limit_per_ip:10m rate=30r/s;
+
+server {
+    limit_conn conn_limit_per_ip 10;
+    limit_req zone=req_limit_per_ip burst=10 nodelay;
+}
+
+# 클라이언트 요청 헤더 읽기용 버퍼 크기
+client_header_buffer_size 3m;
+
+# 클라이언트 요청 body 크기가 버퍼 크기보다 큰 경우 임시 파일에 쓴다
+client_body_buffer_size  128k;
+
+# 클라이언트 요청에서 읽을 대형 헤더의 최대 버퍼 수 및 크기
+large_client_header_buffers 4 256k;
+
+# 클라이언트 요청 헤더 읽기 시간 제한
+client_body_timeout 60s;
+client_header_timeout 10s;
+```
+### limit_conn_zone / limit_conn
+- limit_conn_zone 지시어는 클라이언트 IP 주소를 해싱하여 클라이언트 당 연결 수를 제한하는데 사용된다.
+
+### limit_req_zone / limit_req
+- limit_req_zone 지시어는 시간 당 요청 수를 제한하는데 사용된다.
+- rate=5r/s 는 초당 5개의 요청을 허용한다는 의미이다.
+
+
+
+## 그 외 적용 방법
+- SSL 을 적용시켜 HTTP2 또는 더 나아가 HTTP3/QUIC 를 사용하면 성능 향상을 기대할 수 있다.
+- Nginx Plus 를 사용하면 더 많은 기능을 사용할 수 있으며, 성능 향상을 기대할 수 있다.
+
+## 기타
+### 연산자 참조
+- = : 같다
+- ! = : 다르다
+- ~ : 정규 표현식 패턴 매칭
+- !~ : ~의 반대
+- ~* : 대소문자를 구분하지 않는 정규 표현식 패턴 매칭
+- !~* : ~* 의 반대
+- -f : 파일이 존재하는 지 여부를 테스트
+- !-f : -f의 반대
+- -d : 디렉토리가 존재하는지 테스트
+- !-d : -d의 반대
+- -e : 파일, 디렉토리, 심볼릭 링크 존재 여부 테스트
+- !-e : e의 반대
+- -x : 파일이 존재하고 실행 가능한지를 테스트
+- !-x : -x의 반대
+
+
+### 변수 참조
+
+- $host : 현재 요청의 호스트명. 호스트명은 일반적으로 머신이 위치하는 IP나 도메인
+- $uri = document_uri : 현재 요청의 uri. 호스트명과 파라미터는 제외된다.
+- $args : URL의 질의 문자열
+- $arg_[PARAMETER]
+- $binary_remote_addr : 바이너리 형식의 클라이언트 주소
+- $body_bytes_sent : 전송된 바디의 바이트 수
+- $content_length : HTTP 요청 헤더의 Content-Type과 동일
+- $document_root : 현재 요청의 document root 값이 root 지시어와 동일
+- $http_HEADER : http 헤더의 값을 소문자로, 대시(-)를 밑줄(_)로 변환한 값
+- $scheme: HTTP의 구조로 http, https를 의미
+- $server_addr: 서버주소
+- $server_name: 서버 이름
+- $server_port: 서버 포트
+- $server_protocol: HTTP 요청 프로토콜 (HTTP/1.0 혹은 HTTP/1.1)
+- $cookie_COOKIE : cookie의 값을 알아내는 데 사용하는 변수
 
 <seealso>
 <category ref="reference">
