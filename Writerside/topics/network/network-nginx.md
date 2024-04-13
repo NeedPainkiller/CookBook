@@ -3,7 +3,7 @@
 - 일반적으로 Nginx 는 기본 설정으로도 충분히 빠르게 동작하지만, 특정 상황에 따라 성능을 향상시키기 위해 설정을 변경할 수 있다.
 - nginx 는 Intel Xeon CPU 환경에서 초당 400K ~ 500K 요청(클러스터링)을 처리할 수 있으며, 대부분 초당 50K ~ 80K(비클러스터링) 요청 및 30% CPU 로드에 준한다.
 
-## Linux 영역
+## Linux 커널 영역
 
 - 해당 영역은 Nginx 가 동작하는 리눅스 환경에서의 설정을 다룬다.
 - Nginx 튜닝을 마친 후에도 성능이 나오지 않는 경우에는 리눅스 커널 튜닝을 통해 성능 향상을 기대할 수 있는데, 여러 옵션을 수정하는 것을 권장한다.
@@ -43,14 +43,19 @@ sudo /sbin/sysctl -w net.ipv4.tcp_max_syn_backlog="1024"
 echo "net.ipv4.tcp_max_syn_backlog=1024" >> /etc/sysctl.conf
 ```
 
-- net.ipv4.tcp_syncookies
+- net.ipv4.tcp_syncookies, tcp_syn_retries, tcp_retries1
     - 동일 client 에서 새로운 SYN 패킷을 수신받더라도 syn backlog queue 에 쌓지 않으므로 tcp_max_syn_backlog 설정에 도움이 된다.
+    - 서비스가 부하가 클 경우 응답처리가 되지 않아 retry 들이 증가, 신규 요청을 처리할 수 없게 된다.
+    - 이때 tcp_syn_retries 를 축소시킴으로서 신규 유입을 증가 시키고, 응답이 없을 시 불필요한 재시도를 줄이는 것이다.
 
 ```Bash
-# default : 0
-sudo /sbin/sysctl -w net.ipv4.tcp_syncookies="1"
+sudo /sbin/sysctl -w net.ipv4.tcp_syncookies="1" # default : 0
+sudo /sbin/sysctl -w net.ipv4.tcp_syn_retries ="2" # default : 5
+sudo /sbin/sysctl -w net.ipv4.tcp_retries1 ="2" # default : 3
 # 영구 적용 
 echo "net.ipv4.tcp_syncookies=1" >> /etc/sysctl.con
+echo "net.ipv4.tcp_syn_retries=2" >> /etc/sysctl.con
+echo "net.ipv4.tcp_retries1=2" >> /etc/sysctl.con
  ```
 
 - net.core.netdev_max_backlog : 수신 대기 큐의 최대 길이
@@ -77,33 +82,38 @@ echo "net.core.netdev_max_backlog=30000" >> /etc/sysctl.conf
 ```Bash
 cat /proc/sys/fs/file-max
 # default : 65536
-sudo /sbin/sysctl -w fs.file-max="9223372036854775807"
+sudo /sbin/sysctl -w fs.file-max="65536"
+# 영구 적용
+echo "fs.file-max=65536" >> /etc/sysctl.conf
 ```
 
 - hard limit / Soft limit
+    - nofile - max number of open file descriptors
+    - nproc - max number of processes
     - 값 확인하기
-
-```Bash
-ulimit -Hn 
-ulimit -Sn
-
-# 유저별 확인
-su -c "ulimit -Hn" nginx
-su -c "ulimit -Sn" nginx
-```
-
-- 값 변경하기
-
-```Bash
-# /etc/security/limits.conf 에 아래 내용 추가
-vi /etc/security/limits.conf
-
-* hard nofile 65535
-* soft nofile 65535
-# 또는 사용자 별 지정
-nginx hard nofile 65535
-nginx soft nofile 65535 
-```
+  ```Bash
+  ulimit -Hn 
+  ulimit -Sn
+  
+  # 유저별 확인
+  su -c "ulimit -Hn" nginx
+  su -c "ulimit -Sn" nginx
+  ```
+    - 값 변경하기
+  ```Bash
+    # /etc/security/limits.conf 에 아래 내용 추가
+  vi /etc/security/limits.conf
+  
+  * hard nofile 65535
+  * soft nofile 65535
+  * hard nproc 10240
+  * soft nproc 10240 
+  # 또는 사용자 별 지정
+  nginx hard nofile 65535
+  nginx soft nofile 65535 
+  nginx hard nproc 10240
+  nginx soft nproc 10240 
+  ```
 
 ### Network (TCP, IP) 설정
 
@@ -178,10 +188,12 @@ echo "net.ipv4.tcp_window_scaling=1" >> /etc/sysctl.conf
 ```
 
 - TCP socket 송수신(Send,Receive) buffer 사이즈 증가
-  - net.core.rmem_default, net.core.rmem_max, net.core.wmem_default, net.core.wmem_max, net.ipv4.tcp_rmem, net.ipv4.tcp_wmem
-    - TCP 소켓의 수신 버퍼와 송신 버퍼의 크기를 설정한다.
-    - 소켓의 버퍼 크기를 늘리면 네트워크 대역폭이 높은 환경에서 성능을 향상시킬 수 있다.
-    - 소켓의 버퍼 크기를 늘리면 네트워크 대역폭이 높은 환경에서 성능을 향상시킬 수 있다. 
+    - 네트웍 드라이버의 버퍼 메모리 확보
+    - net.core.rmem_default, net.core.rmem_max, net.core.wmem_default, net.core.wmem_max, net.ipv4.tcp_rmem,
+      net.ipv4.tcp_wmem
+        - TCP 소켓의 수신 버퍼와 송신 버퍼의 크기를 설정한다.
+        - 소켓의 버퍼 크기를 늘리면 네트워크 대역폭이 높은 환경에서 성능을 향상시킬 수 있다.
+        - 소켓의 버퍼 크기를 늘리면 네트워크 대역폭이 높은 환경에서 성능을 향상시킬 수 있다.
 
 ```Bash
 sysctl -w net.core.rmem_default="253952"
@@ -198,6 +210,60 @@ echo "net.core.wmem_default=253952" >> /etc/sysctl.conf
 echo "net.core.wmem_max=8388608" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_rmem=8192   87380   8388608" >> /etc/sysctl.conf
 echo "net.ipv4.tcp_wmem=8192   87380   8388608" >> /etc/sysctl.conf
+```
+
+### 일괄 적용
+
+- cat /etc/sysctl.d/sys_tune.conf 파일에 위 설정을 일괄 저장한다
+
+```Bash
+net.core.somaxconn="1024"
+net.ipv4.tcp_max_syn_backlog="1024"
+net.ipv4.tcp_syncookies="1" 
+net.ipv4.tcp_syn_retries ="2" 
+net.ipv4.tcp_retries1 ="2"
+net.core.netdev_max_backlog="30000"
+fs.file-max="65536"
+net.ipv4.ip_local_port_range="1024 65535"
+net.ipv4.tcp_max_tw_buckets="1800000"
+net.ipv4.tcp_tw_reuse="1"
+net.ipv4.tcp_timestamps="1"
+net.ipv4.tcp_tw_recycle="0"
+net.ipv4.tcp_window_scaling="1"
+net.core.rmem_default="253952"
+net.core.rmem_max="8388608"
+net.core.wmem_default="253952"
+net.core.wmem_max="8388608"
+net.ipv4.tcp_rmem="8192   87380   8388608"
+net.ipv4.tcp_wmem="8192   87380   8388608"
+```
+
+- `sysctl -p` 명령어로 적용
+
+## 파일 시스템 영역
+
+- Nginx 는 소켓처리, 로깅을 위해 파일을 읽어오는 작업이 많기 때문에 파일 시스템의 성능에 따라 Nginx 의 성능이 달라질 수 있다.
+- 디스크 I/O 를 최적화하기 위해 파일 시스템의 설정을 변경할 수 있다.
+
+### fstab 설정
+
+- filesystem 에서 사용하는 mount 옵션 설정을 수정한다.
+    - noatime : 파일에 접근할 때마다 파일의 마지막 접근 시간을 업데이트하지 않는다.
+    - nodirtime : 디렉토리에 접근할 때마다 디렉토리의 마지막 접근 시간을 업데이트하지 않는다.
+- noatime, nodirtime 옵션을 사용하면 파일에 접근할 때마다 파일의 마지막 접근 시간을 업데이트하지 않아 디스크 I/O 를 줄일 수 있다.
+- [참조](https://couplewith.tistory.com/228)
+
+```Bash
+#vi /etc/fstab 
+
+/dev/sda1 /data ext4 defaults,noatime,nodirtime 1 2
+/dev/sdb1 /var/lib/docker  ext4 defaults,noatime,nodirtime 1 2
+
+# 이미 마운트된 상태에서 /data 디스크의 마운트 옵션을 변경
+mount -o remount /data
+
+# 마운트 확인
+cat /proc/mounts
 ```
 
 ## nginx 영역
@@ -356,12 +422,26 @@ proxy_read_timeout 60s;
 # proxied server로 요청을 전송하는 timeout 시간
 proxy_send_timeout 60s;
 
+map $status $loggable { 
+# 응답코드가 200, 304인 경우에는 로그 제외
+  ~^[23] 0;
+  default 1;
+}
+
 # 로그위치 설정
+
 # HDD의 I/O를 높이기 위해 액세스 로그를 비활성화 하는 것도 추천된다.
 access_log off;
+
+# 응답코드가 200, 304인 경우에는 로그 제외
+# access_log /var/log/nginx/access.log combined if=$loggable;
+
+# 버퍼에 로그를 쌓아두고 일정 시간이 지나면 로그를 디스크에 쓰는 방식
+# access_log /var/log/nginx/access.log main buffer=32k flush=1m gzip=1;
+
 # 심각 한 오류만 로그
 error_log /var/log/nginx/www_error.log crit;
-# error_log /var/log/nginx/crit-error.log crit;
+
 # 존재하지 않는 파일에 대한 로그를 남기지 않음
 log_not_found off;
 
@@ -530,6 +610,36 @@ map $http_upgrade $connection_upgrade {
 - 지정한 시간안에 proxied server가 아무것도 수신하지 않으면 connection을 닫는다.
 - default : 60s
 
+### 로그
+#### access_log
+- 로그는 디스크 I/O 를 많이 사용하므로 HDD의 I/O를 높이기 위해 액세스 로그를 비활성화 하는 것도 추천된다.
+```NGINX
+access_log off; 
+```
+- 혹은 로그를 쌓아두고 일정 시간이 지나면 로그를 디스크에 쓰는 방식으로 로그를 관리할 수 있다.
+```NGINX
+access_log /var/log/nginx/access.log main buffer=32k flush=1m gzip=1;
+```
+- 응답코드가 200, 304인 경우에는 로그를 제외하고 싶을 때는 다음과 같이 설정할 수 있다.
+```NGINX
+map $status $loggable { 
+  ~^[23] 0;
+  default 1;
+}
+access_log /var/log/nginx/access.log combined if=$loggable;
+```
+#### error_log
+- 심각 한 오류만 로그
+```NGINX
+error_log /var/log/nginx/www_error.log crit;
+```
+- 존재하지 않는 파일에 대한 로그를 남기지 않음
+  - 404 에러가 발생할 때마다 로그를 남기는 것은 불필요한 로그를 남기게 되므로, 존재하지 않는 파일에 대한 로그를 남기지 않도록 설정하는 것이 좋다.
+  - 이를 위해 log_not_found 옵션을 off 로 설정한다.
+```NGINX
+log_not_found off;
+```
+
 ## upstream 영역
 
 ```NGINX
@@ -551,6 +661,14 @@ upstream backend  {
 ### keepalive
 
 - upstream 서버와의 keepalive 연결 수를 지정한다.
+
+## location 영역
+- 웹 정적 리소스들 (이미지, CSS, JS 등)에 대한 access_log 를 비활성화 하는 것이 좋다.
+```NGINX
+location ~* \.(?:jpg|jpeg|gif|png|ico|woff2|js|css)$ {
+  access_log off;
+}
+```
 
 <seealso>
 <category ref="reference">
