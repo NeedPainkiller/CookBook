@@ -118,8 +118,8 @@ echo "fs.file-max=65536" >> /etc/sysctl.conf
 ### Network (TCP, IP) 설정
 
 - net.ipv4.ip_local_port_range
-    - 클라이언트가 서버에 접속할 때 생성되는 소켓 생성시 사용 가능한 로컬 포트 범위를 설정한다.
-    - 이 값을 높이면 클라이언트가 서버에 접속할 때 사용하는 포트 범위가 넓어지므로 포트가 부족해지는 문제를 해결할 수 있다.
+    - 클라이언트가 서버에 접속할 때 생성되는 소켓 생성시 사용 가능한 로컬 임시포트 범위를 설정한다.
+    - 이 값을 높이면 클라이언트가 서버에 접속할 때 사용하는 임시포트 범위가 넓어지므로 포트가 부족해지는 문제를 해결할 수 있다.
     - 커널 오류 메시지 : "connect() failed (99: Cannot assign requested address) while connecting to upstream" 가 자주 발생한다면 이 값을
       높여가면서 조정하는 것을 추천한다.
 
@@ -151,7 +151,7 @@ sysctl -w net.ipv4.tcp_tw_reuse="1"
 echo "net.ipv4.tcp_tw_reuse=1" >> /etc/sysctl.conf
 ```
 
-- sysctl net.ipv4.tcp_timestamps
+- net.ipv4.tcp_timestamps
     - TCP Timestamps 를 사용할지 여부를 설정한다.
     - net.ipv4.tcp_tw_reuse 의 활성화를 위해서 적용해야 한다.
     - 짧은 시간에 sequence number 가 overflow 되는 상황에서 새로 수신되는 패킷을 버리는 문제를 해결
