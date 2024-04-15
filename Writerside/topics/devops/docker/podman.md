@@ -64,6 +64,32 @@
 ```Bash
 podman -v
 ```
+### 레거시 문제
+- Ubuntu 22.04 를 대상으로 podman 은 아직 3.4.4 버젼이 최신이다, 이는 RHEL 의 5.0.1 에 비하면 너무 낮은 버젼이다
+  - [How to install podman 4.4 on Ubuntu 22.04](https://github.com/containers/podman/discussions/17362#discussioncomment-9010372)
+- Homebrew 를 통해 최신 버젼을 설치할 수 있다
+  - [Maybe not ideal, but I figured that homebrew on Linux allows installing the latest podman version](https://github.com/containers/podman/discussions/17362#discussioncomment-9010372)
+```Bash
+# Brew 설치
+sudo apt-get install build-essential curl file git
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+```
+```Bash
+# PATH 설정
+touch ~/.zshrc
+# 아래 내용 추가 
+export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+export MANPATH="/home/linuxbrew/.linuxbrew/share/man:$MANPATH"
+export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:$INFOPATH"
+```
+```Bash
+source ~/.zshrc
+```
+```Bash
+# https://formulae.brew.sh/formula/podman
+brew install podman
+podman -v
+```
 
 ## Podman Compose {id="podman_2_2"}
 <tabs>
