@@ -12,6 +12,9 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 sudo usermod -aG docker ${USER}
 ```
 
+- root 외 사용자가 Docker 명령어를 사용하려면 사용자를 docker 그룹에 추가해야 한다.
+  - https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user
+
 ## 명령어 {id="docker_2"}
 ```bash
 # Docker Image 다운로드 - docker pull 명령어는 Docker 이미지를 다운로드합니다.
