@@ -110,6 +110,35 @@ rsync -avpz --delete --exclude="lost+found" 192.168.10.100::TEST/ /home/
 rsync -avpz --delete --exclude-from=/tmp/rsync-exclude.txt --bwlimit=10240 192.168.10.100::TEST/ /home/
 ```
 
+#### samples
+```Bash
+sudo rsync -arv --no-p --chmod=ugo=rwX /mnt/sub_2/JJ/ /mnt/HDD_4TiB_1/JJ/
+
+sudo rsync -arv /mnt/sub_2/VOICE/ /mnt/HDD_4TiB_1/VOICE/
+sudo rsync -arv --progress /mnt/sub_2/MOVIE/ /mnt/HDD_4TiB_1/MOVIE/
+
+sudo rsync -arv --progress /mnt/sub_2/IMAGE/ /mnt/HDD_4TiB_1/IMAGE/
+sudo rsync -arv --progress /mnt/sub_2/ETC/ /mnt/HDD_4TiB_1/ETC/
+sudo rsync -arv --progress /mnt/sub_2/temps/ /mnt/HDD_4TiB_1/temps/
+
+
+sudo ntfs-3g /dev/sda1 /mnt/MEDIA_MOVIE
+sudo ntfs-3g /dev/sdb1 /mnt/MEDIA_ANIME
+
+ll /mnt/sub_2
+
+/mnt/sub_2/VOICE
+
+find /mnt/sub_2/VOICE -type f -exec bash -c '[[ ${#0} -gt 255 ]] && echo "긴 파일명: $0"' {} \;
+
+find /mnt/sub_2/VOICE -type d -exec bash -c 'if [[ ${#1} -gt 255 ]]; then echo "긴 폴더명: $1"; fi' _ {} \;
+
+
+sudo rsync -arv --progress '/mnt/sub_1/새 폴더/' '/mnt/HDD_4TiB_1/VOICE/새 폴더/new/'
+
+sudo rsync -arv --progress '/mnt/MEDIA_MOVIE/ANIME/' '/mnt/MEDIA_ANIME/ANIME/'
+```
+
 <seealso>
     <category ref="reference">
         <a href="https://velog.io/@inhwa1025/Linux-rsync란-rsync-사용법-rsync로-데이터-백업하기">[Linux] rsync란? rsync 사용법 / rsync로 데이터 백업하기</a>
