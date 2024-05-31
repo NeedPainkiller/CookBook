@@ -56,4 +56,5 @@
     </toc-element>
     <toc-element topic="nodejs.md"/>
     <toc-element topic="python.md"/>
+    <toc-element topic="freelancer.md"/>
 </instance-profile>
