@@ -14,3 +14,5 @@
 0.3 지방세
 
 건보료 지역가입자 체크
+
+https://youtu.be/1A0VXdpObpM?si=-XtNCOOGSp0n6iyx
