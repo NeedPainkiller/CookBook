@@ -15,4 +15,6 @@
 
 건보료 지역가입자 체크
 
+- nps에서 건보료 및 곡민연귿 일괄 관리하므로 국민연금에 신고후 납부시 건보료 통지서도 수신가능
+
 https://youtu.be/1A0VXdpObpM?si=-XtNCOOGSp0n6iyx
