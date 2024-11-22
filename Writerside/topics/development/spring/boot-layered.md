@@ -54,6 +54,38 @@ COPY --from=builder application/application/ ./
 ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
 ```
 
+### 개선
+- Docker 레이어 캐싱으로 빌드 시간 단축
+- 의존성이 변경되지 않으면 해당 레이어는 재사용
+- 애플리케이션 코드만 변경 시 해당 레이어만 재빌드
+- 컨테이너 이미지 크기 최적화
+
+## 실행
+```Bash
+# JAR 추출
+java -Djarmode=layertools -jar myapp.jar list
+java -Djarmode=layertools -jar myapp.jar extract
+
+# 일반 실행
+java -jar myapp.jar
+```
+
+## 커스텀 레이어 설정 예시
+```Gradle
+bootJar {
+    layered {
+        enabled = true
+        application {
+            intoLayer("custom-layer") {
+                include "com/example/specific/**"
+            }
+            intoLayer("application")
+        }
+    }
+}
+```
+
+
 <seealso>
     <category ref="official">
         <a href="https://www.baeldung.com/spring-boot-docker-images#layered-jars">Creating Docker Images with Spring Boot</a>
