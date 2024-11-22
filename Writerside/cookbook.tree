@@ -8,6 +8,7 @@
     <toc-element topic="readme.md"/>
     <toc-element topic="spring-index.md">
         <toc-element topic="gradle.md"/>
+        <toc-element topic="boot-layered.md"/>
         <toc-element topic="spring-jwt.md"/>
     </toc-element>
     <toc-element topic="devops-index.md">
