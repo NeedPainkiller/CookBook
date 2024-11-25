@@ -63,6 +63,11 @@ poetry init
 ```bash
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
 ```
+or 
+```Bash
+# Recommended (with venv)
+pip install poetry
+```
 
 ### poetry 업데이트 {id="poetry_1_2"}
 ```bash
