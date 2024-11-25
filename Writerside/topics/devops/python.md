@@ -40,8 +40,8 @@ pyenv shell <version>
 pyenv version
 ```
 
-## pipx {id="pyenv_2"}
-### pipx 설치 (pip 19.0+) {id="pyenv_2_1"}
+## pipx {id="pipx_1"}
+### pipx 설치 (pip 19.0+) {id="pipx_1_1"}
 ```bash
 python.exe -m pip install --upgrade pip
 pip --version
@@ -52,10 +52,88 @@ python -m pipx list
 python -m pip install --upgrade pipx
 ```
 
-## Poetry {id="pyenv_3"}
-### Poetry 설치 (Python 3.8+) {id="pyenv_3_1"}
+## Poetry {id="poetry_1"}
+### Poetry 설치 (pipx & Python 3.8+) {id="poetry_1_1"}
 ```bash
 python -m pipx install poetry
 python -m pipx upgrade poetry
 poetry init
+```
+#### without pipx {id="poetry_1_1_1"}
+```bash
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+```
+
+### poetry 업데이트 {id="poetry_1_2"}
+```bash
+poetry self update
+```
+
+### poetry 사용법 {id="poetry_1_3"}
+```bash
+# 프로젝트 생성 (디렉터리 생성)
+poetry new <project_name>
+# 프로젝트 생성 (현재 디렉터리)
+poetry init
+# 패키지 추가
+poetry add <package_name>
+poetry add <package_name>@<version>
+# 개발 패키지 추가
+poetry add --dev <package_name>
+# 패키지 삭제
+poetry remove <package_name>
+# 패키지 업데이트
+poetry update
+# 패키지 리스트
+poetry show
+# 패키지 리스트 (tree)
+poetry show --tree
+# 패키지 리스트 (최신 버전)
+poetry show --latest
+# 패키지 리스트 (업데이트 가능)
+poetry show --outdated
+# 패키지 리스트 (개발용 의존성 제외)
+poetry show --no-dev
+# 의존성 내보내기
+poetry export -f requirements.txt --output requirements.txt
+# 의존성 내보내기 (해시 제외)
+poetry export -f requirements.txt --output requirements.txt --without-hashes
+# 의존성 내보내기 (개발의존성 제외)
+poetry export -f requirements.txt --output requirements.txt --without-hashes --without dev
+# 패키지 설치
+poetry install
+# 패키지 빌드
+poetry build
+# 배포
+poetry publish
+# 패키지 실행
+poetry run <command>
+# 가상환경 생성
+poetry shell
+# 가상환경 삭제
+poetry env remove <python_version>
+# 가상환경 리스트
+poetry env list
+# 가상환경 활성화
+poetry env use <python_version>
+# 가상환경 비활성화 
+deactivate
+```
+
+### pyproject.toml 예시 {id="poetry_1_4"}
+```toml
+[tool.poetry]
+name = "project_name"
+version = "0.1.0"
+description = ""
+authors = ["author_name <author_email>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 ```
