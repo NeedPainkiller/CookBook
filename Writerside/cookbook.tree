@@ -55,6 +55,10 @@
         <toc-element topic="db-mssql-index.md">
             <toc-element topic="db-mssql-backup.md"/>
         </toc-element>
+        <toc-element topic="db-postgresql-index.md">
+            <toc-element topic="db-postgresql-properties.md"/>
+            <toc-element topic="db-postgresql-ha.md"/>
+        </toc-element>
     </toc-element>
     <toc-element topic="nodejs.md"/>
     <toc-element topic="python.md"/>
