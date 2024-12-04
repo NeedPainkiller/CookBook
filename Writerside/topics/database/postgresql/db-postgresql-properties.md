@@ -40,6 +40,21 @@
 
 #### Transaction ID Wraparound
 - `xmin`, `xmax` 에 저장되는 `Transaction ID` 는 최대 `4byte` 값을 가지며, 약 42억(2^32 - 1) 까지의 id 가 발급된다.
+- `Transaction ID` 는 순차적으로 발급되기 때문에 `Transaction ID` 가 42억 값을 넘어가는 순간부터 다시 처음으로 회송되어 1부터 발급 받게 된다.
+- 이 순간 `Transaction ID` 는 과거/미래간 `Transaction` 의 데이터 보장을 위해 과거는 n보다 작은 값, 미래는 n보다 큰 값으로 유추하는데
+- `Transaction ID` 가 1로 회송되는 순간 그 이전의 "과거" 데이터가 "미래"의 변경 건으로 전환되어 버리기에 과거 데이터가 모두 유실된다.
+
+#### Anti Wraparound Vacuum
+- `Transaction ID Wraparound` 를 방지하기 위해 PostgreSQL 의 `MVCC` 는 `table`, `tuple` 에 `age` 를 생성한다
+- `age` 는 insert 시 **1** 부터 시작하여 해당 테이블에 대한 `Transaction` 이 아니더라도 DB 내에 `Transaction` 이 발생할 때 마다 모든 오브젝트의 `age` 가 1 증가한다.
+- `age` 가 특점 임계값을 초과하는 시점부터 `Transaction ID Wraparound` 를 방지하기 위한 `Anti Wraparound Vacuum` 의 처리 대상이 된다.
+- `Anti Wraparound Vacuum` 이 수행되면 `age` 는 `freeze` 되어 `frozen XID = 2` 라는 특수한 `Transaction ID` 로 변환된다.
+- 각 `table age` 와 `tuple age` 는 `Anti Wraparound Vacuum` 에 의헤 age 가 재조정되어 감소하게 된다. (`freezing`)
+  - `tuple age` : `Anti Wraparound Vacuum` 수행 시 `tuple` 대상 채로 `freeze` 되어 `vacuum_freeze_min_age`(def : 50,000,000)  보다 높은경우 대상에 포함된다.
+  - `table age` : `freeze` 대상에 포함되지는 않으나, `table age` 테이블에 속한 `tuple` 중 가장 높은 `tuple age` 로 설정되며, `table age` 를 참조함으로서 테이블이 `freeze` 대상이 되는지 짐작 할 수 있다.
+    - `vacuum_freeze_table_age`, `autoacuum_freeze_table_max_age` 값을 기준으로 `table age` 를 검사하여 `Anti Wraparound Vacuum` 를 수행한다.
+  
+#### AutoVacuum
 
 
 ## Properties
