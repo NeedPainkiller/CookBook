@@ -54,7 +54,39 @@
   - `table age` : `freeze` 대상에 포함되지는 않으나, `table age` 테이블에 속한 `tuple` 중 가장 높은 `tuple age` 로 설정되며, `table age` 를 참조함으로서 테이블이 `freeze` 대상이 되는지 짐작 할 수 있다.
     - `vacuum_freeze_table_age`, `autoacuum_freeze_table_max_age` 값을 기준으로 `table age` 를 검사하여 `Anti Wraparound Vacuum` 를 수행한다.
   
-#### AutoVacuum
+#### Vacumm 의 수행 기준
+  - `dead tuple` 의 개수의 누적치가 임계치에 도달했을 때 수행 
+  - `tuple age` or `table age` 가 누적되어 임계치에 도달했을 때 수행
+
+##### Dead Tuple 의 누적 임계치 초과
+```js
+vacuum threshold = autovacuum_vacuum_threshold + autovacuum_vacuum_scale_factor * [number of Tuple]
+```
+```PostgreSQL
+testdb=# select name,setting from pg_settings where name in ('autovacuum_vacuum_scale_factor', 'autovacuum_vacuum_threshold');
+              name              | setting
+--------------------------------+---------  
+autovacuum_vacuum_scale_factor | 0.2  
+autovacuum_vacuum_threshold    | 50
+```
+- `autovacuum_vacuum_scale_factor` : 테이블의 전체 `Tuple` 개수 중 설정한 비율만큼의 데이터가 변경되면 해당 테이블에 대해 `AutoVacuum`. (def : 0.2)
+- `autovacuum_vacuum_threshold` : 의미는 `autovacuum_vacuum_scale_factor와` 동일하지만, 비율이 아니라 테이블 내 변경된 `Tuple` 개수로 판단. (def : 50)
+- > 테이블 내 `dead tuple` 누적치가 테이블의 모든 행 중 20% + 50개를 초과하는 경우. `AutoVacuum` 수행
+
+##### Tuple Age / Table Age 의 누적되어 임계치 초과
+```PostgreSQL
+testdb=# select name,setting from pg_settings where name like '%freeze%';
+                name                 |  setting
+-------------------------------------+-----------
+ autovacuum_freeze_max_age           | 200000000
+ vacuum_freeze_min_age               | 50000000
+ vacuum_freeze_table_age             | 150000000
+```
+
+- `autovacuum_freeze_max_age`: 해당 값을 초과하는 `table age`에 대해 `Anti Wraparound AutoVacuum` 을 수행, `AutoVacuum을` off해도 강제로 수행
+- `vacuum_freeze_min_age`: 해당 값을 초과하는 `age` 의 테이블 에 대해 `vacuum` 작업 시 `Transaction ID` 의 `freeze` 작업의 대상으로 한다. `Anti Wraparound AutoVacuum` 수행 이후 `table age`는 최대 `vacuum_freeze_min_age` 값으로 설정됨
+- `vacuum_freeze_table_age`: 해당 값을 초과하는 `age` 의 테이블에 대해 `vacuum` 호출될 때 `frozen` 작업도 같이 수행함
+  - 다수의 테이블들이 `autovacuum_freeze_max_age` 에 걸려서 동시에 `Anti Wraparound AutoVacuum` 이 수행되기 전에, 그전에 `vacuum` 이 호출된 테이블이 `Anti Wraparound AutoVacuum` 으로 돌도록 분산하는 효과
 
 
 ## Properties
@@ -126,4 +158,5 @@ services:
 ```
 
 
+https://techblog.woowahan.com/9478/
 https://techblog.woowahan.com/9478/
