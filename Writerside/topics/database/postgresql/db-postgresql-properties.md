@@ -14,26 +14,32 @@
 - `Read/Write` 간 충돌 & `Lock` 을 방지하여 동시성을 높인다.
 - PostgreSQL 의 `MVCC는` ORACLE, MySQL 과 동작방식이 달라 그 특징을 이해해야 한다.
   - ORACLE, MySQL 의 `MVCC` 는 `UNDO segment(Rollback segment)` 를 기반으로한다
-  - Oracle : 타 트랜잭션에 의해 변경된 블록이 확인 될 경우, 원본 블록으로 부터 CR Copy 를 만들어, 해당 복사본 블록에 `UNDO segment` 를 걸어, 쿼리의 시작시점으로 restore 한 뒤 읽는다.
+  - Oracle : 타 트랜잭션에 의해 변경된 블록이 확인 될 경우, 원본 블록으로 부터 `CR Copy` 를 만들어, 해당 복사본 블록에 `UNDO segment` 를 걸어, 쿼리의 시작시점으로 restore 한 뒤 읽는다.
   - MySQL : 트랜잭션 내 변경된 정보가 `UNDO segment` 에 선 저장되고, 그 이후 변경 내용들을 Linked List 처럼 포인터 형태로 연결하는 모습을 보인다. 신규 트랜잭션이 수행될 경우, 해당 포인터를 기준으로 리스트를 역조회 하여 트랜잭션 ID 를 비교, 자신이 읽을 수 있는 시점의 Data 를 확인한다.
-- PostgreSQL 의 경우 insert/update 시점의 트랜잭션 ID 를 갖는 `xmin` 메타데이터 필드와 delete/update 시점의  트랜잭션 ID 를 같는 `xmax` 메타데이터 필드를 가진다
-  - 각 `tuple (record)` 별로 `xmin`, `xmax` 을 가지며 각 필드가 가진 트랜잭션 ID 를 검토하여 조회한다
-  - update된 데이터의 저장이 완료되면 update 이전의 원본 Tuple을 가리키던 포인터를 새로 update된 Tuple을 가리키도록 업데이트 함
-  - 간략하게 insert/update/delete 때마다 각 tuple 의 버젼정보와 로그가 기록되고 있다고 보면 된다
+- PostgreSQL 의 경우 insert/update 시점의 트랜잭션 ID 를 갖는 `xmin` 메타데이터 필드와 delete/update 시점의  `Transaction ID` 를 같는 `xmax` 메타데이터 필드를 가진다
+  - 각 `tuple (record)` 별로 `xmin`, `xmax` 을 가지며 각 필드가 가진 `Transaction ID` 를 검토하여 조회한다
+  - update된 데이터의 저장이 완료되면 update 이전의 원본 `tuple` 을 가리키던 포인터를 새로 update된 `tuple` 을 가리키도록 업데이트 함
+  - 간략하게 insert/update/delete 때마다 각 `tuple` 의 버젼정보와 로그가 기록되고 있다고 보면 된다
   - [작동방식 설명](https://techblog.woowahan.com/9478/)
 - `xmin`, `xmax` 은 FSM(FreeSpaceMap) 에 저장된다.
 
 ### Vacuum
 - PostgreSQL 의 `MVCC` 처리 방식에서 `dead tuple` 이 발생한다.
 - `dead tuple` 을 정리하기 위한 `GC` 같은 존재가 `vacuum` 이다.
+
 #### Dead Tuple
-- update 이전의 원본 Tuple 은 update 후 포인터가 새로 지정되면서 유기된다.
-- 아무도 참조하지 않는 해당 tuple 을 `dead tuple` 이라고 하며, JVM 환경에서의 미 참조 오브젝트에 빗댈 수 있다.
-- `dead tuple` 또한 page 에 포함되어, 쿼리에 영향을 주게되고, 단일 page 는 8kb 가 기본이기 때문에, `dead tuple` 이 늘어날 수록 `live tuple` 의 조회가능 크기가 줄어들어 DISK IO 가 필수적으로 발생하게된다.
-- 해당 dead tuple 이 차지하고 있는 FSM 메모리 점유를 정리하기 위해 `vacuum` 이 필요하다.
+- update 이전의 원본 `tuple` 은 update 후 포인터가 새로 지정되면서 유기된다.
+- 아무도 참조하지 않는 해당 `tuple` 을 `dead tuple` 이라고 하며, JVM 환경에서의 미 참조 오브젝트에 빗댈 수 있다.
+- `dead tuple` 또한 `page` 에 포함되어, 쿼리에 영향을 주게되고, 단일 `page` 는 **8kb** 가 기본이기 때문에, `dead tuple` 이 늘어날 수록 `live tuple` 의 조회가능 크기가 줄어들어 DISK IO 가 필수적으로 발생하게된다.
+- 해당 `dead tuple` 이 차지하고 있는 `FSM` 메모리 점유를 정리하기 위해 `vacuum` 이 필요하다.
+
+#### Vacuum Full
+- `vacuum` 또한 `vacuum full` 과 일반 `vacuum` 이 있는데, `dead tuple` 이 발생하면서 생긴 물리적인 디스크 용량에 의해 쿼리 검색이 느려지며, `vacuum full` 은 여기서 물리디스크의 할당된 크기까지 초기화하여 회수할 수 있다.
+  - `vacuum` 은 특정 case 가 아닌 경우 할당된 물리적 디스크를 반납하지 않기에, 테이블 사이즈는 유지되나, `FSM` 에 할당된 위치는 반납한다. 
+  - `vacumm full` 은 조회 Lock 까지 적용하여 수행해야 하는 문제가 있어 운영 환경에서는 진행하기 어려우며, 해당 테이블을 전체 COPY 후 Log Table 의 변경사항을 업데이트하고 원본 테이블로 swap 하는 방식이기 때문에, 추가적인 물리 디스크 용량을 필요로 한다.
 
 #### Transaction ID Wraparound
-- `
+- `xmin`, `xmax` 에 저장되는 `Transaction ID` 는 최대 `4byte` 값을 가지며, 약 42억(2^32 - 1) 까지의 id 가 발급된다.
 
 
 ## Properties
@@ -103,3 +109,6 @@ services:
     ports:
       - "5432:5432"
 ```
+
+
+https://techblog.woowahan.com/9478/
