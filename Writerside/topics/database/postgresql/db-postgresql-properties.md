@@ -5,8 +5,22 @@
 ## 사전 지식
 ### WAL (Write-ahead logging / 로그 선행 기입)
 - DB 의 수정사항을 물리적인 저장장치에 저장하기 이전에 미리 적재해 두는 로그
+- `Shared Memory` 에 상주하는 `WAL Buffer` 에 우선 저장 후, 특정 시점에 `WAL Writer`에 의해 `WAL 파일` 에 로그형태로 저장된다.
 - DISK IO, NETWORK IO 로 인한 OverHead 가 발생하므로 물리적인 기록 이전에 선행하는 작업이다
 - 트랜잭션이 시작하면 로그에 우선 기록한 뒤 트리거 또는 요청에 의해 flush 하여 DataBlock 으로 write
+
+### Shared Buffer
+- DISK I/O를 최소화하기 위해 레지스터 처럼 주로 사용하는 `block` 을 `Shared Memory`에 상주할 수 있도록 하는 버퍼
+
+### bg_writer
+- 주기적으로 `Shared Buffer` 의 버퍼를 물리적 DISK 의 데이터 파일 (`base`) 에 기록하는 프로세서
+
+### Checkpoint
+- 모든 `PostgreSQL` 의 데이터 파일이 WAL 에서 물리적으로 DISK Write 되는 시점을 의미한다.
+
+### Vacuum
+- PostgreSQL 의 `MVCC` 처리 방식에서 `dead tuple` 이 발생한다.
+- `dead tuple` 을 정리하기 위한 `GC` 같은 존재가 `vacuum` 이다.
 
 ### MVCC (Multi-Version Concurrency Control)
 - `MVCC`는 `Transaction ID` 를 기반으로 DBMS 에서의 동시성을 보장한다
@@ -22,10 +36,6 @@
   - 간략하게 insert/update/delete 때마다 각 `tuple` 의 버젼정보와 로그가 기록되고 있다고 보면 된다
   - [작동방식 설명](https://techblog.woowahan.com/9478/)
 - `xmin`, `xmax` 은 FSM(FreeSpaceMap) 에 저장된다.
-
-### Vacuum
-- PostgreSQL 의 `MVCC` 처리 방식에서 `dead tuple` 이 발생한다.
-- `dead tuple` 을 정리하기 위한 `GC` 같은 존재가 `vacuum` 이다.
 
 #### Dead Tuple
 - update 이전의 원본 `tuple` 은 update 후 포인터가 새로 지정되면서 유기된다.
@@ -88,6 +98,31 @@ testdb=# select name,setting from pg_settings where name like '%freeze%';
 - `vacuum_freeze_table_age`: 해당 값을 초과하는 `age` 의 테이블에 대해 `vacuum` 호출될 때 `frozen` 작업도 같이 수행함
   - 다수의 테이블들이 `autovacuum_freeze_max_age` 에 걸려서 동시에 `Anti Wraparound AutoVacuum` 이 수행되기 전에, 그전에 `vacuum` 이 호출된 테이블이 `Anti Wraparound AutoVacuum` 으로 돌도록 분산하는 효과
 
+### pg_dump 시 빠른 데이터 복구 또는 재설정
+- dump 를 통해 입력 작업 시 빠른 DISK IO 를 확보하는 것이 제일 중요하다
+
+#### fsync
+- 설정 : off
+- `PostgreSQL` 의 데이터 파일 (`global`, `base` Directory) 과 트랜잭션 로그조각 파일 (`pg_xlog` Directory) 은 DISK R/W 작업이 필수적으로 일어난다.
+- 위 두 위치에서의 물리적인 디스크 쓰기가 많아지며 dump 작업 시 DB 전체를 재생성하는 경우에 고려하도록 하자
+- 'on' 일 경우에 `fsync()` 시스템 콜을 사용하게 되며, 변경분을 DISK 에 직접 Write 하며, OS 또는 HW 이슈 발생시 일관성을 유지하도록 한다.
+- 'off' 일 경우에는 OS 에게 DISK Write 책임이 넘어가게 되면서, 성능상 우위는 확보되나 DISK 에 정상 기입되었는지 확인하기 어려워 OS 및 HW 이슈에 대응하기 힘들다
+- 그 외 read-only 데이터베이스에 복제하거나 fail-over 에 사용하지 않는 경우에 사용할 것
+
+#### synchronous_commit 
+- 설정 : off
+- `commit` 된 `Transaction` 은 `pg_xlog` 트랜잭션 로그조각 파일에 기록되어야 한다. (테이블이 `unlogged` 일 경우 예외)
+- `pg_xlog` 에 저장 (DISK) 되기 전에 `WAL 버퍼`에 기록되는데, 이 처리과정에서 어느 시점을 기준으로 기록을 확인할 지 정하는 것이다.
+- 'on' : `WAL 버퍼` > `pg_xlog` 에 저장, 즉 DISK 에 저장되었을 경우 리턴한다
+- 'off' : `WAL 버퍼` 에 저장되는 시점에 바로 리턴한다. 이후 DISK 저장시 까지는 일부 delay 가 존재한다.
+  - 이 경우 안정성을 보장하기 어려워 DISK 에 저장되지 않은 `commit` 은 DB/OS 시스템 장애시 복구하지 못하고 손실된다.
+- 'remote_write' : HA 구성 시 remote 인스턴스의 DISK 단계까지 저장되었을 경우 리턴
+  - remote 인스턴스의 OS 시스템 장애 시 복구 어려울 수 있음
+- 'local' : HA 구성 시 master 인스턴스의 DISK 에 저장 시 리턴
+
+#### full_page_writes 
+- 설정 : off
+- `PostgreSQL` 은 
 
 ## Properties
 - shared_buffers: 데이터베이스 서버가 공유 메모리 버퍼에 사용하는 메모리 양
@@ -159,4 +194,4 @@ services:
 
 
 https://techblog.woowahan.com/9478/
-https://techblog.woowahan.com/9478/
+http://minsql.com/postgres/PostgreSQL-synchronous_commit-%EA%B0%9C%EB%85%90%EB%8F%84/
