@@ -125,6 +125,29 @@ testdb=# select name,setting from pg_settings where name like '%freeze%';
 - `PostgreSQL` 은 기본적으로(`full_page_writes` = 'on')  `Checkpoint` 후 해당 데이터 page 의 첫 변경시 해당 페이지의 모든 정보를 트랜잭션 로그에 기록한다.
 - 'off' 로 설정한 경우 데이터 page 가 손상되지 않았음을 전제로 진행된다. 위 `fsync` 와 `synchronous_commit` 이 'off' 상태인 경우 같이 'off' 설정 한다.
 
+#### checkpoint_segments 
+- `checkpoint_segments` * 16mb 만큼의 트랜잭션 로그조각 파일을 저장 할 수 있다.
+- DISK 여유가 있는 한 `checkpoint_segments` * 15 개 가량의 트랜잭션 로그 조각 파일이 생성된다
+- 대용량 자료 입력에서는 신규 트랜잭션 로그 조각 파일을 만들어 내지 않도록, 로그 조각 파일을 재활용 할 수 있게 유도해야한다.
+- OS 가 허용 하는 한 최대로 지정함이 좋다
+- `txid_crruent()`, `pg_switch_xlog()` 함수를 미리 호출하여 사전에 트랜잭션 로그 조각 파일을 우선 확보하는 방법도 추천한다.
+
+#### maintenance_work_mem 
+- 대용량 자료 입력시 INDEX 작업을 후속으로 진행하게 되는데, 이 때 사용할 수 있는 메모리를 OS 가 허용하는 최대로 설정함이 좋다.
+
+#### wal_level 
+- 설정 : minimal
+- 디스크 I/O 최소화
+
+#### archive_mode  
+- 설정 : off
+- 디스크 I/O 최소화
+- https://rastalion.dev/415/
+
+#### autovacuum
+- 설정 : off
+- 입력 작업 도중 불필요한 `vacumm` 작업을 방지.
+- 이후 다시 활성화 할 것
 
 
 ## Properties
