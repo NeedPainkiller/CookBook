@@ -122,7 +122,10 @@ testdb=# select name,setting from pg_settings where name like '%freeze%';
 
 #### full_page_writes 
 - 설정 : off
-- `PostgreSQL` 은 
+- `PostgreSQL` 은 기본적으로(`full_page_writes` = 'on')  `Checkpoint` 후 해당 데이터 page 의 첫 변경시 해당 페이지의 모든 정보를 트랜잭션 로그에 기록한다.
+- 'off' 로 설정한 경우 데이터 page 가 손상되지 않았음을 전제로 진행된다. 위 `fsync` 와 `synchronous_commit` 이 'off' 상태인 경우 같이 'off' 설정 한다.
+
+
 
 ## Properties
 - shared_buffers: 데이터베이스 서버가 공유 메모리 버퍼에 사용하는 메모리 양
