@@ -2,8 +2,12 @@ version: '3.8'
 
 x-postgres-common: &postgres-common
   image: docker.io/bitnami/postgresql-repmgr:11
-  #  restart: always
+   restart: always
   network_mode: "host"
+  expose:
+    - 5432
+  ports: # 1 개 장비에서 테스트 하므로 각 포트를 다르게 설정
+    - 5432
   healthcheck:
     test: 'pg_isready -U postgres --dbname=postgres'
     interval: 10s
@@ -19,18 +23,21 @@ x-postgres-environment: &postgres-environment
   REPMGR_USERNAME: repmgr
   REPMGR_PASSWORD: repmgrpassword
 
-x-postgres-expose: &postgres-expose
-  expose:
-    - 5432
-x-postgres-port: &postgres-port
-  ports: # 1 개 장비에서 테스트 하므로 각 포트를 다르게 설정
-    - 15432:5432
-
 
 x-pgpool-common: &pgpool-common
   image: docker.io/bitnami/pgpool:4
-  #  restart: always
+  restart: always
   network_mode: "host"
+  expose:
+    - 9000 # watchdog accepts connections
+    - 9694 # UDP port for receiving Watchdog's heartbeat signal
+    - 9898 # PCP process accepts connections
+    - 9999 # Pgpool-II accepts connections
+  ports: # 1 개 장비에서 테스트 하므로 각 포트를 다르게 설정
+    - 9000
+    - 9694
+    - 9898
+    - 9999
   healthcheck:
     test: [ "CMD", "/opt/bitnami/scripts/pgpool/healthcheck.sh" ]
     interval: 10s
@@ -55,41 +62,28 @@ x-pgpool-environment: &pgpool-environment
   PGPOOL_HEALTH_CHECK_MAX_RETRIES: 5
   PGPOOL_NUM_INIT_CHILDREN: 32
 
-x-pgpool-expose: &pgpool-expose
-  expose:
-    - 9000 # watchdog accepts connections
-    - 9694 # UDP port for receiving Watchdog's heartbeat signal
-    - 9898 # PCP process accepts connections
-    - 9999 # Pgpool-II accepts connections
-x-pgpool-port: &pgpool-port
-  ports: # 1 개 장비에서 테스트 하므로 각 포트를 다르게 설정
-    - 19000:9000
-    - 19694:9694
-    - 19898:9898
-    - 19999:9999
-
 services:
   pg-1:
     <<: *postgres-common
-    <<: *postgres-port
-    <<: *postgres-expose
     volumes:
       - pg_1_data:/bitnami/postgresql
     environment:
       <<: *postgres-environment
-      REPMGR_PRIMARY_HOST: pg-1
-      REPMGR_PARTNER_NODES: pg-1,pg-2,pg-3
-      REPMGR_NODE_NAME: pg-1
-      REPMGR_NODE_NETWORK_NAME: pg-1
+      REPMGR_PRIMARY_HOST: pg-node-1
+      REPMGR_PARTNER_NODES: pg-node-1,pg-node-2,pg-node-3
+      REPMGR_NODE_NAME: pg-node-1
+      REPMGR_NODE_NETWORK_NAME: pg-node-1
 
   pgpool-1:
     <<: *pgpool-common
-    <<: *pgpool-port
-    <<: *pgpool-expose
+    volumes:
+      - ./pgpool.conf:/config/myconf.conf
     environment:
       <<: *pgpool-environment
-      PGPOOL_BACKEND_NODES: 0:pg-1:15432,1:pg-2:25432,2:pg-3:35432
-      PGPOOL_WD_HOSTNAME: pgpool-1
+      PGPOOL_USER_CONF_FILE: /config/myconf.conf
+      PGPOOL_BACKEND_APPLICATION_NAMES: pg-node-1,pg-node-2,pg-node-3
+      PGPOOL_BACKEND_NODES: 0:pg-node-1,1:pg-node-2,2:pg-node-3
+      PGPOOL_WD_HOSTNAME: pg-node-1
       PGPOOL_WD_PORT: 9000
     depends_on:
       - pg-1
