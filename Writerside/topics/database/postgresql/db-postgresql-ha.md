@@ -48,7 +48,7 @@
 ```yaml
 version: '3.8'
 x-postgres-common:
-  &postgres-common
+        &postgres-common
   image: postgres:14-alpine
   user: postgres
   restart: always
@@ -57,7 +57,7 @@ x-postgres-common:
     interval: 10s
     timeout: 5s
     retries: 5
-  
+
 services:
   postgres_primary:
     <<: *postgres-common
@@ -145,105 +145,135 @@ repmgrd -f /etc/repmgr.conf
 version: '3.8'
 
 x-postgres-common:
-  &postgres-common
+    &postgres-common
   image: docker.io/bitnami/postgresql-repmgr:11
   user: postgres
-  restart: always
+  #  restart: always
+  networks:
+    - postgresql-network
+  environment:
+    - POSTGRESQL_POSTGRES_PASSWORD=adminpassword
+    - POSTGRESQL_USERNAME=postgresuser
+    - POSTGRESQL_PASSWORD=postgrespasswrd
+    - POSTGRESQL_DATABASE=testdb
+    - POSTGRESQL_NUM_SYNCHRONOUS_REPLICAS=1
+    - REPMGR_PASSWORD=repmgrpassword
   healthcheck:
-    test: 'pg_isready -U user --dbname=postgres'
+    test: 'pg_isready -U user --dbname=testdb'
+    interval: 10s
+    timeout: 5s
+    retries: 5
+
+x-pgpool-common:
+    &pgpool-common
+  image: docker.io/bitnami/pgpool:4
+  #  restart: always
+  networks:
+    - postgresql-network
+  environment:
+    - PGPOOL_SR_CHECK_USER=postgresuser
+    - PGPOOL_SR_CHECK_PASSWORD=postgrespasswrd
+    - PGPOOL_ENABLE_LDAP=no
+    - PGPOOL_POSTGRES_USERNAME=postgresuser
+    - PGPOOL_POSTGRES_PASSWORD=postgrespasswrd
+    - PGPOOL_ADMIN_USERNAME=postgresadmin
+    - PGPOOL_ADMIN_PASSWORD=postgresadminpassword
+    - PGPOOL_ENABLE_LOAD_BALANCING=yes
+    - PGPOOL_ENABLE_WATCHDOG=yes
+    - PGPOOL_WD_HEARTBEAT_PORT=9694
+    - PGPOOL_WD_HEARTBEAT_DESTINATION_PORT=9694
+    - PGPOOL_WD_HEARTBEAT_DESTINATION=pgpool-1,pgpool-2,pgpool-3
+    - PGPOOL_WD_IPC_SOCKET_DIR=/tmp
+    - PGPOOL_WD_DELEGATE_IP=192.168.0.100
+  healthcheck:
+    test: [ "CMD", "/opt/bitnami/scripts/pgpool/healthcheck.sh" ]
     interval: 10s
     timeout: 5s
     retries: 5
 
 
+
 services:
   pg-1:
-    image: docker.io/bitnami/postgresql-repmgr:11
+    <<: *postgres-common
     ports:
-      - 5432
+      - 15432:5432
     volumes:
       - pg_1_data:/bitnami/postgresql
     environment:
-      - POSTGRESQL_POSTGRES_PASSWORD=adminpassword
-      - POSTGRESQL_USERNAME=customuser
-      - POSTGRESQL_PASSWORD=custompassword
-      - POSTGRESQL_DATABASE=customdatabase
-      - POSTGRESQL_NUM_SYNCHRONOUS_REPLICAS=1
-      - REPMGR_PASSWORD=repmgrpassword
       - REPMGR_PRIMARY_HOST=pg-1
       - REPMGR_PARTNER_NODES=pg-1,pg-2,pg-3
       - REPMGR_NODE_NAME=pg-1
       - REPMGR_NODE_NETWORK_NAME=pg-1
-     
+      -
   pg-2:
-    image: docker.io/bitnami/postgresql-repmgr:11
+    <<: *postgres-common
     ports:
-      - 5432
+      - 15433:5432
     volumes:
       - pg_2_data:/bitnami/postgresql
     environment:
-      - POSTGRESQL_POSTGRES_PASSWORD=adminpassword
-      - POSTGRESQL_USERNAME=customuser
-      - POSTGRESQL_PASSWORD=custompassword
-      - POSTGRESQL_DATABASE=customdatabase
-      - POSTGRESQL_NUM_SYNCHRONOUS_REPLICAS=1
-      - REPMGR_PASSWORD=repmgrpassword
       - REPMGR_PRIMARY_HOST=pg-1
       - REPMGR_PARTNER_NODES=pg-1,pg-2,pg-3
       - REPMGR_NODE_NAME=pg-2
       - REPMGR_NODE_NETWORK_NAME=pg-2
   pg-3:
-    image: docker.io/bitnami/postgresql-repmgr:11
+    <<: *postgres-common
     ports:
-      - 5432
+      - 15434:5432
     volumes:
       - pg_3_data:/bitnami/postgresql
     environment:
-      - POSTGRESQL_POSTGRES_PASSWORD=adminpassword
-      - POSTGRESQL_USERNAME=customuser
-      - POSTGRESQL_PASSWORD=custompassword
-      - POSTGRESQL_DATABASE=customdatabase
-      - POSTGRESQL_NUM_SYNCHRONOUS_REPLICAS=1
-      - REPMGR_PASSWORD=repmgrpassword
       - REPMGR_PRIMARY_HOST=pg-1
       - REPMGR_PARTNER_NODES=pg-1,pg-2,pg-3
       - REPMGR_NODE_NAME=pg-3
       - REPMGR_NODE_NETWORK_NAME=pg-3
- 
- 
-  pgpool:
-    image: docker.io/bitnami/pgpool:4
+
+  pgpool-1:
+    <<: *pgpool-common
     ports:
-      - 5432:5432
+      - 25432:5432
     environment:
-      - PGPOOL_BACKEND_NODES=0:pg-1:5432,1:pg-2:5432,2:pg-3:5432
-      - PGPOOL_SR_CHECK_USER=customuser
-      - PGPOOL_SR_CHECK_PASSWORD=custompassword
-      - PGPOOL_ENABLE_LDAP=no
-      - PGPOOL_POSTGRES_USERNAME=postgres
-      - PGPOOL_POSTGRES_PASSWORD=adminpassword
-      - PGPOOL_ADMIN_USERNAME=admin
-      - PGPOOL_ADMIN_PASSWORD=adminpassword
-      - PGPOOL_ENABLE_LOAD_BALANCING=yes
- 
-    healthcheck:
-      test: ["CMD", "/opt/bitnami/scripts/pgpool/healthcheck.sh"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
- 
+      - PGPOOL_BACKEND_NODES=0:pg-1:15432,1:pg-2:15433,2:pg-3:15434
+      - PGPOOL_WD_HOSTNAME=pgpool-1
+      - PGPOOL_WD_PORT=9000
+
+  pgpool-2:
+    <<: *pgpool-common
+    ports:
+      - 25433:5432
+    environment:
+      - PGPOOL_BACKEND_NODES=0:pg-1:15432,1:pg-2:15433,2:pg-3:15434
+      - PGPOOL_WD_HOSTNAME=pgpool-2
+      - PGPOOL_WD_PORT=9000
+
+  pgpool-3:
+    <<: *pgpool-common
+    ports:
+      - 25434:5432
+    environment:
+      - PGPOOL_BACKEND_NODES=0:pg-1:15432,1:pg-2:15433,2:pg-3:15434
+      - PGPOOL_WD_HOSTNAME=pgpool-3
+      - PGPOOL_WD_PORT=9000
+
+
   pgadmin:
     image: dpage/pgadmin4
     restart: always
     container_name: pgadmin4
     ports:
-      - "5050:80"
+      - 5050:80
     environment:
       PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
       PGADMIN_DEFAULT_PASSWORD: password
     volumes:
       - ./data/pgadmin/:/var/lib/pgadmin
-   
+
+
+networks:
+  postgresql-network:
+    driver: host
+
 volumes:
   pg_1_data:
     driver: local
@@ -256,27 +286,27 @@ volumes:
 
 ## Properties
 - shared_buffers: 데이터베이스 서버가 공유 메모리 버퍼에 사용하는 메모리 양
-Recommended Value: 256MB (사용 가능한 메모리에 따라 달라짐)
+  Recommended Value: 256MB (사용 가능한 메모리에 따라 달라짐)
 - wal_level: Sets the level of information written to the WAL (Write-Ahead Log).  
-Recommended Value: replica (for replication setups)
+  Recommended Value: replica (for replication setups)
 - archive_mode: Enables WAL archiving.  
-Recommended Value: on (if you need to archive WAL files)
+  Recommended Value: on (if you need to archive WAL files)
 - archive_command: Specifies the shell command to use to archive a completed WAL file segment.  
-Recommended Value: cp %p /path/to/archive/%f (adjust the path as needed)
+  Recommended Value: cp %p /path/to/archive/%f (adjust the path as needed)
 - effective_cache_size: An estimate of the memory available for disk caching by the operating system and within the database itself.  
-Recommended Value: 512MB (사용 가능한 메모리에 따라 달라집)
+  Recommended Value: 512MB (사용 가능한 메모리에 따라 달라집)
 - min_wal_size: Minimum size to shrink the WAL to.  
-Recommended Value: 80MB
+  Recommended Value: 80MB
 - max_wal_size: Maximum size to let the WAL grow to.  
-Recommended Value: 1GB
+  Recommended Value: 1GB
 - logging_collector: Enables the collection of log messages to a log file.  
-Recommended Value: on
+  Recommended Value: on
 - log_line_prefix: Controls the information prefixed to each log line.  
-Recommended Value: %t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h
+  Recommended Value: %t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h
 - autovacuum_max_workers: Sets the maximum number of autovacuum processes.  
-Recommended Value: 3
+  Recommended Value: 3
 - timezone: Sets the time zone for displaying and interpreting time stamps.  
-Recommended Value: UTC
+  Recommended Value: UTC
 - log_timezone: Sets the time zone used for timestamps in log messages.  
-Recommended Value: UTC
+  Recommended Value: UTC
 
