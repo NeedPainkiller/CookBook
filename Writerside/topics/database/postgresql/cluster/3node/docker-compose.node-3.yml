@@ -1,9 +1,16 @@
 version: '3.8'
 
+x-pg-extra-hosts: &pg-extra-hosts
+  extra_hosts:
+#    - "pg-1:10.0.0.11"
+#    - "pg-2:10.0.0.12"
+#    - "pg-3:10.0.0.13"
+
 x-postgres-common: &postgres-common
   image: docker.io/bitnami/postgresql-repmgr:11
   restart: always
   network_mode: "host"
+  <<: *pg-extra-hosts
   expose:
     - 5432
   ports: # 1 개 장비에서 테스트 하므로 각 포트를 다르게 설정
@@ -28,6 +35,7 @@ x-pgpool-common: &pgpool-common
   image: docker.io/bitnami/pgpool:4
   restart: always
   network_mode: "host"
+  <<: *pg-extra-hosts
   expose:
     - 9000 # watchdog accepts connections
     - 9694 # UDP port for receiving Watchdog's heartbeat signal
@@ -64,6 +72,8 @@ x-pgpool-environment: &pgpool-environment
 
 services:
   pg-3:
+    container_name: pg-3
+    hostname: pg-3
     <<: *postgres-common
     volumes:
       - pg_3_data:/bitnami/postgresql
@@ -75,6 +85,8 @@ services:
       REPMGR_NODE_NETWORK_NAME: pg-node-3
 
   pgpool-3:
+    container_name: pgpool-3
+    hostname: pgpool-3
     <<: *pgpool-common
     volumes:
       - ./pgpool.conf:/config/myconf.conf
