@@ -1,105 +1,30 @@
 version: '3.8'
 
-x-pg-extra-hosts: &pg-extra-hosts
-  extra_hosts:
-#    - "pg-1:10.0.0.11"
-#    - "pg-2:10.0.0.12"
-#    - "pg-3:10.0.0.13"
-
-x-postgres-common: &postgres-common
-  image: docker.io/bitnami/postgresql-repmgr:11
-  restart: always
-  network_mode: "host"
-  <<: *pg-extra-hosts
-  expose:
-    - 5432
-  ports: # 1 개 장비에서 테스트 하므로 각 포트를 다르게 설정
-    - 5432
-  healthcheck:
-    test: 'pg_isready -U postgres --dbname=postgres'
-    interval: 10s
-    timeout: 5s
-    retries: 5
-
-x-postgres-environment: &postgres-environment
-  POSTGRESQL_POSTGRES_PASSWORD: postgres
-  POSTGRESQL_USERNAME: postgres
-  POSTGRESQL_PASSWORD: postgres
-  POSTGRESQL_DATABASE: postgres
-  POSTGRESQL_NUM_SYNCHRONOUS_REPLICAS: 1
-  REPMGR_USERNAME: repmgr
-  REPMGR_PASSWORD: repmgrpassword
-
-
-x-pgpool-common: &pgpool-common
-  image: docker.io/bitnami/pgpool:4
-  restart: always
-  network_mode: "host"
-  <<: *pg-extra-hosts
-  expose:
-    - 9000 # watchdog accepts connections
-    - 9694 # UDP port for receiving Watchdog's heartbeat signal
-    - 9898 # PCP process accepts connections
-    - 9999 # Pgpool-II accepts connections
-  ports: # 1 개 장비에서 테스트 하므로 각 포트를 다르게 설정
-    - 9000
-    - 9694
-    - 9898
-    - 9999
-  healthcheck:
-    test: [ "CMD", "/opt/bitnami/scripts/pgpool/healthcheck.sh" ]
-    interval: 10s
-    timeout: 5s
-    retries: 5
-
-x-pgpool-environment: &pgpool-environment
-  PGPOOL_SR_CHECK_USER: postgres
-  PGPOOL_SR_CHECK_PASSWORD: postgres
-  PGPOOL_ENABLE_LDAP: no
-  PGPOOL_POSTGRES_USERNAME: postgres
-  PGPOOL_POSTGRES_PASSWORD: postgres
-  PGPOOL_ADMIN_USERNAME: postgres
-  PGPOOL_ADMIN_PASSWORD: postgres
-  PGPOOL_POSTGRES_CUSTOM_USERS: customuser
-  PGPOOL_POSTGRES_CUSTOM_PASSWORDS: custompassword
-  PGPOOL_ENABLE_LOAD_BALANCING: yes
-  PGPOOL_AUTO_FAILBACK: yes
-  PGPOOL_ENABLE_WATCHDOG: yes
-  PGPOOL_MAX_POOL: 15
-  PGPOOL_CONNECTION_LIFE_TIME: 0
-  PGPOOL_HEALTH_CHECK_MAX_RETRIES: 5
-  PGPOOL_NUM_INIT_CHILDREN: 32
-
 services:
   pg-2:
+    extends:
+      file: common.yml
+      service: postgres-common
     container_name: pg-2
     hostname: pg-2
-    <<: *postgres-common
     volumes:
-      - pg_2_data:/bitnami/postgresql
+      - ./data:/bitnami/postgresql
     environment:
-      <<: *postgres-environment
-      REPMGR_PRIMARY_HOST: pg-node-1
-      REPMGR_PARTNER_NODES: pg-node-1,pg-node-2,pg-node-3
       REPMGR_NODE_NAME: pg-node-2
       REPMGR_NODE_NETWORK_NAME: pg-node-2
 
   pgpool-2:
+    extends:
+      file: common.yml
+      service: pgpool-common
     container_name: pgpool-2
     hostname: pgpool-2
-    <<: *pgpool-common
-    volumes:
-      - ./pgpool.conf:/config/myconf.conf
     environment:
-      <<: *pgpool-environment
-      PGPOOL_USER_CONF_FILE: /config/myconf.conf
-      PGPOOL_BACKEND_APPLICATION_NAMES: pg-node-1,pg-node-2,pg-node-3
-      PGPOOL_BACKEND_NODES: 0:pg-node-1,1:pg-node-2,2:pg-node-3
       PGPOOL_WD_HOSTNAME: pg-node-2
       PGPOOL_WD_PORT: 9000
     depends_on:
       - pg-2
 
-volumes:
-  pg_2_data:
-    driver: local
+#volumes:
+#  pg_2_data:
+#    driver: local

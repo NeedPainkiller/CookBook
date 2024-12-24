@@ -1,0 +1,76 @@
+version: '3.8'
+
+x-pg-extra-hosts: &pg-extra-hosts
+  extra_hosts:
+    - "pg-node-1:10.2.0.4"
+    - "pg-node-2:10.2.0.5"
+    - "pg-node-3:10.2.0.6"
+
+services:
+  postgres-common:
+    image: docker.io/bitnami/postgresql-repmgr:11
+    restart: always
+    network_mode: "host"
+    <<: *pg-extra-hosts
+    expose:
+      - 5432
+    ports:
+      - 5432
+    environment:
+      POSTGRESQL_POSTGRES_PASSWORD: postgres
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE: postgres
+      POSTGRESQL_NUM_SYNCHRONOUS_REPLICAS: 1
+      REPMGR_USERNAME: repmgr
+      REPMGR_PASSWORD: repmgrpassword
+      REPMGR_PRIMARY_HOST: pg-node-1
+      REPMGR_PARTNER_NODES: pg-node-1,pg-node-2,pg-node-3
+    healthcheck:
+      test: 'pg_isready -U postgres --dbname=postgres'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgpool-common:
+    image: docker.io/bitnami/pgpool:4
+    restart: always
+    network_mode: "host"
+    <<: *pg-extra-hosts
+    expose:
+      - 9000 # watchdog accepts connections
+      - 9694 # UDP port for receiving Watchdog's heartbeat signal
+      - 9898 # PCP process accepts connections
+      - 9999 # Pgpool-II accepts connections
+    ports:
+      - 9000
+      - 9694
+      - 9898
+      - 9999
+    volumes:
+      - ./pgpool.conf:/config/myconf.conf
+    environment:
+      PGPOOL_SR_CHECK_USER: postgres
+      PGPOOL_SR_CHECK_PASSWORD: postgres
+      PGPOOL_ENABLE_LDAP: no
+      PGPOOL_POSTGRES_USERNAME: postgres
+      PGPOOL_POSTGRES_PASSWORD: postgres
+      PGPOOL_ADMIN_USERNAME: postgres
+      PGPOOL_ADMIN_PASSWORD: postgres
+      PGPOOL_POSTGRES_CUSTOM_USERS: customuser
+      PGPOOL_POSTGRES_CUSTOM_PASSWORDS: custompassword
+      PGPOOL_ENABLE_LOAD_BALANCING: yes
+      PGPOOL_AUTO_FAILBACK: yes
+      PGPOOL_ENABLE_WATCHDOG: yes
+      PGPOOL_MAX_POOL: 15
+      PGPOOL_CONNECTION_LIFE_TIME: 0
+      PGPOOL_HEALTH_CHECK_MAX_RETRIES: 5
+      PGPOOL_NUM_INIT_CHILDREN: 32
+      PGPOOL_USER_CONF_FILE: /config/myconf.conf
+      PGPOOL_BACKEND_APPLICATION_NAMES: pg-node-1,pg-node-2,pg-node-3
+      PGPOOL_BACKEND_NODES: 0:pg-node-1,1:pg-node-2,2:pg-node-3
+    healthcheck:
+      test: [ "CMD", "/opt/bitnami/scripts/pgpool/healthcheck.sh" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
