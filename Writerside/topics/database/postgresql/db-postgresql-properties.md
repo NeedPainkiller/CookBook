@@ -189,7 +189,89 @@ testdb=# select name,setting from pg_settings where name like '%freeze%';
   - 선택: 유효한 Timezone 값 (e.g., UTC, America/New_York)
 
 
-### Docker 예시
+
+### Docker
+
+#### Environment
+| Name                                | Description                                                      | 설명                                                         | Default Value                              |
+|-------------------------------------|------------------------------------------------------------------|-------------------------------------------------------------|--------------------------------------------|
+| POSTGRESQL_VOLUME_DIR               | Persistence base directory                                       | 지속성 기본 디렉토리                                         | /bitnami/postgresql                        |
+| POSTGRESQL_DATA_DIR                 | PostgreSQL data directory                                        | PostgreSQL 데이터 디렉토리                                    | ${POSTGRESQL_VOLUME_DIR}/data              |
+| POSTGRESQL_EXTRA_FLAGS              | Extra flags for PostgreSQL initialization                        | PostgreSQL 초기화를 위한 추가 플래그                           | nil                                        |
+| POSTGRESQL_INIT_MAX_TIMEOUT         | Maximum initialization waiting timeout                           | 최대 초기화 대기 시간                                          | 60                                         |
+| POSTGRESQL_PGCTLTIMEOUT             | Maximum waiting timeout for pg_ctl commands                      | pg_ctl 명령어의 최대 대기 시간                                 | 60                                         |
+| POSTGRESQL_SHUTDOWN_MODE            | Default mode for pg_ctl stop command                             | pg_ctl 중지 명령의 기본 모드                                   | fast                                       |
+| POSTGRESQL_CLUSTER_APP_NAME         | Replication cluster default application name                     | 복제 클러스터 기본 애플리케이션 이름                           | walreceiver                                |
+| POSTGRESQL_DATABASE                 | Default PostgreSQL database                                      | 기본 PostgreSQL 데이터베이스                                   | postgres                                   |
+| POSTGRESQL_INITDB_ARGS              | Optional args for PostgreSQL initdb operation                    | PostgreSQL initdb 작업을 위한 선택적 인수                       | nil                                        |
+| ALLOW_EMPTY_PASSWORD                | Allow password-less access                                       | 비밀번호 없는 접근 허용                                        | no                                         |
+| POSTGRESQL_INITDB_WAL_DIR           | Optional init db wal directory                                   | 선택적 init db wal 디렉토리                                    | nil                                        |
+| POSTGRESQL_MASTER_HOST              | PostgreSQL master host (used by slaves)                          | PostgreSQL 마스터 호스트 (슬레이브에서 사용)                    | nil                                        |
+| POSTGRESQL_MASTER_PORT_NUMBER       | PostgreSQL master host port (used by slaves)                     | PostgreSQL 마스터 호스트 포트 (슬레이브에서 사용)               | 5432                                       |
+| POSTGRESQL_NUM_SYNCHRONOUS_REPLICAS | Number of PostgreSQL replicas that should use synchronous replication | 동기 복제를 사용하는 PostgreSQL 복제본 수                       | 0                                          |
+| POSTGRESQL_SYNCHRONOUS_REPLICAS_MODE| PostgreSQL synchronous replication mode (values: empty, FIRST, ANY) | PostgreSQL 동기 복제 모드 (값: empty, FIRST, ANY)              | nil                                        |
+| POSTGRESQL_PORT_NUMBER              | PostgreSQL port number                                           | PostgreSQL 포트 번호                                           | 5432                                       |
+| POSTGRESQL_ALLOW_REMOTE_CONNECTIONS | Modify pg_hba settings so users can access from the outside      | 사용자가 외부에서 접근할 수 있도록 pg_hba 설정 수정              | yes                                        |
+| POSTGRESQL_REPLICATION_MODE         | PostgreSQL replication mode (values: master, slave)              | PostgreSQL 복제 모드 (값: master, slave)                       | master                                     |
+| POSTGRESQL_REPLICATION_USER         | PostgreSQL replication user                                      | PostgreSQL 복제 사용자                                         | nil                                        |
+| POSTGRESQL_REPLICATION_USE_PASSFILE | Use PGPASSFILE instead of PGPASSWORD                             | PGPASSWORD 대신 PGPASSFILE 사용                                | no                                         |
+| POSTGRESQL_REPLICATION_PASSFILE_PATH| Path to store passfile                                           | 패스파일을 저장할 경로                                         | ${POSTGRESQL_CONF_DIR}/.pgpass             |
+| POSTGRESQL_SYNCHRONOUS_COMMIT_MODE  | Enable synchronous replication in slaves (number defined by POSTGRESQL_NUM_SYNCHRONOUS_REPLICAS) | 슬레이브에서 동기 복제를 활성화 (POSTGRESQL_NUM_SYNCHRONOUS_REPLICAS로 정의된 수) | on                                         |
+| POSTGRESQL_FSYNC                    | Enable fsync in write ahead logs                                 | 선행 기록 로그에서 fsync 활성화                                | on                                         |
+| POSTGRESQL_USERNAME                 | PostgreSQL default username                                      | PostgreSQL 기본 사용자 이름                                    | postgres                                   |
+| POSTGRESQL_ENABLE_LDAP              | Enable LDAP for PostgreSQL authentication                        | PostgreSQL 인증을 위한 LDAP 활성화                              | no                                         |
+| POSTGRESQL_LDAP_URL                 | PostgreSQL LDAP server url (requires POSTGRESQL_ENABLE_LDAP=yes) | PostgreSQL LDAP 서버 URL (POSTGRESQL_ENABLE_LDAP=yes 필요)      | nil                                        |
+| POSTGRESQL_LDAP_PREFIX              | PostgreSQL LDAP prefix (requires POSTGRESQL_ENABLE_LDAP=yes)     | PostgreSQL LDAP 접두사 (POSTGRESQL_ENABLE_LDAP=yes 필요)        | nil                                        |
+| POSTGRESQL_LDAP_SUFFIX              | PostgreSQL LDAP suffix (requires POSTGRESQL_ENABLE_LDAP=yes)     | PostgreSQL LDAP 접미사 (POSTGRESQL_ENABLE_LDAP=yes 필요)        | nil                                        |
+| POSTGRESQL_LDAP_SERVER              | PostgreSQL LDAP server (requires POSTGRESQL_ENABLE_LDAP=yes)     | PostgreSQL LDAP 서버 (POSTGRESQL_ENABLE_LDAP=yes 필요)          | nil                                        |
+| POSTGRESQL_LDAP_PORT                | PostgreSQL LDAP port (requires POSTGRESQL_ENABLE_LDAP=yes)       | PostgreSQL LDAP 포트 (POSTGRESQL_ENABLE_LDAP=yes 필요)          | nil                                        |
+| POSTGRESQL_LDAP_SCHEME              | PostgreSQL LDAP scheme (requires POSTGRESQL_ENABLE_LDAP=yes)     | PostgreSQL LDAP 스킴 (POSTGRESQL_ENABLE_LDAP=yes 필요)          | nil                                        |
+| POSTGRESQL_LDAP_TLS                 | PostgreSQL LDAP tls setting (requires POSTGRESQL_ENABLE_LDAP=yes)| PostgreSQL LDAP tls 설정 (POSTGRESQL_ENABLE_LDAP=yes 필요)      | nil                                        |
+| POSTGRESQL_LDAP_BASE_DN             | PostgreSQL LDAP base DN settings (requires POSTGRESQL_ENABLE_LDAP=yes) | PostgreSQL LDAP 기본 DN 설정 (POSTGRESQL_ENABLE_LDAP=yes 필요)  | nil                                        |
+| POSTGRESQL_LDAP_BIND_DN             | PostgreSQL LDAP bind DN settings (requires POSTGRESQL_ENABLE_LDAP=yes) | PostgreSQL LDAP 바인드 DN 설정 (POSTGRESQL_ENABLE_LDAP=yes 필요) | nil                                        |
+| POSTGRESQL_LDAP_BIND_PASSWORD       | PostgreSQL LDAP bind password (requires POSTGRESQL_ENABLE_LDAP=yes) | PostgreSQL LDAP 바인드 비밀번호 (POSTGRESQL_ENABLE_LDAP=yes 필요) | nil                                        |
+| POSTGRESQL_LDAP_SEARCH_ATTR         | PostgreSQL LDAP search attribute (requires POSTGRESQL_ENABLE_LDAP=yes) | PostgreSQL LDAP 검색 속성 (POSTGRESQL_ENABLE_LDAP=yes 필요)     | nil                                        |
+| POSTGRESQL_LDAP_SEARCH_FILTER       | PostgreSQL LDAP search filter (requires POSTGRESQL_ENABLE_LDAP=yes) | PostgreSQL LDAP 검색 필터 (POSTGRESQL_ENABLE_LDAP=yes 필요)     | nil                                        |
+| POSTGRESQL_INITSCRIPTS_USERNAME     | Username for the psql scripts included in /docker-entrypoint.initdb | /docker-entrypoint.initdb에 포함된 psql 스크립트의 사용자 이름  | $POSTGRESQL_USERNAME                       |
+| POSTGRESQL_PASSWORD                 | Password for the PostgreSQL created user                         | 생성된 PostgreSQL 사용자의 비밀번호                             | nil                                        |
+| POSTGRESQL_POSTGRES_PASSWORD        | Password for the PostgreSQL postgres user                        | PostgreSQL postgres 사용자의 비밀번호                            | nil                                        |
+| POSTGRESQL_REPLICATION_PASSWORD     | Password for the PostgreSQL replication user                     | PostgreSQL 복제 사용자의 비밀번호                                | nil                                        |
+| POSTGRESQL_INITSCRIPTS_PASSWORD     | Password for the PostgreSQL init scripts user                    | PostgreSQL 초기화 스크립트 사용자의 비밀번호                     | $POSTGRESQL_PASSWORD                       |
+| POSTGRESQL_ENABLE_TLS               | Whether to enable TLS for traffic or not                         | 트래픽에 대해 TLS를 활성화할지 여부                              | no                                         |
+| POSTGRESQL_TLS_CERT_FILE            | File containing the certificate for the TLS traffic              | TLS 트래픽에 대한 인증서가 포함된 파일                           | nil                                        |
+| POSTGRESQL_TLS_KEY_FILE             | File containing the key for certificate                          | 인증서 키가 포함된 파일                                         | nil                                        |
+| POSTGRESQL_TLS_CA_FILE              | File containing the CA of the certificate                        | 인증서의 CA가 포함된 파일                                       | nil                                        |
+| POSTGRESQL_TLS_CRL_FILE             | File containing a Certificate Revocation List                    | 인증서 폐기 목록이 포함된 파일                                   | nil                                        |
+| POSTGRESQL_TLS_PREFER_SERVER_CIPHERS| Whether to use the server TLS cipher preferences rather than the client | 클라이언트보다 서버 TLS 암호 선호를 사용할지 여부                | yes                                        |
+| POSTGRESQL_SHARED_PRELOAD_LIBRARIES | List of libraries to preload at PostgreSQL initialization        | PostgreSQL 초기화 시 미리 로드할 라이브러리 목록                 | pgaudit                                    |
+| POSTGRESQL_PGAUDIT_LOG              | Comma-separated list of actions to log with pgaudit              | pgaudit로 로그할 작업의 쉼표로 구분된 목록                       | nil                                        |
+| POSTGRESQL_PGAUDIT_LOG_CATALOG      | Enable pgaudit log catalog (pgaudit.log_catalog setting)         | pgaudit 로그 카탈로그 활성화 (pgaudit.log_catalog 설정)          | nil                                        |
+| POSTGRESQL_PGAUDIT_LOG_PARAMETER    | Enable pgaudit log parameter (pgaudit.log_parameter setting)     | pgaudit 로그 매개변수 활성화 (pgaudit.log_parameter 설정)        | nil                                        |
+| POSTGRESQL_LOG_CONNECTIONS          | Add a log entry per user connection                              | 사용자 연결당 로그 항목 추가                                     | nil                                        |
+| POSTGRESQL_LOG_DISCONNECTIONS       | Add a log entry per user disconnection                           | 사용자 연결 해제당 로그 항목 추가                                | nil                                        |
+| POSTGRESQL_LOG_HOSTNAME             | Log the client host name when accessing                          | 접근 시 클라이언트 호스트 이름을 로그                             | nil                                        |
+| POSTGRESQL_CLIENT_MIN_MESSAGES      | Set log level of errors to send to the client                    | 클라이언트에 보낼 오류의 로그 수준 설정                           | error                                      |
+| POSTGRESQL_LOG_LINE_PREFIX          | Set the format of the log lines                                  | 로그 라인의 형식 설정                                            | nil                                        |
+| POSTGRESQL_LOG_TIMEZONE             | Set the log timezone                                             | 로그 시간대 설정                                                 | nil                                        |
+| POSTGRESQL_TIMEZONE                 | Set the timezone                                                 | 시간대 설정                                                      | nil                                        |
+| POSTGRESQL_MAX_CONNECTIONS          | Set the maximum amount of connections                            | 최대 연결 수 설정                                                | nil                                        |
+| POSTGRESQL_TCP_KEEPALIVES_IDLE      | Set the TCP keepalive idle time                                  | TCP keepalive 유휴 시간 설정                                      | nil                                        |
+| POSTGRESQL_TCP_KEEPALIVES_INTERVAL  | Set the TCP keepalive interval time                              | TCP keepalive 간격 시간 설정                                      | nil                                        |
+| POSTGRESQL_TCP_KEEPALIVES_COUNT     | Set the TCP keepalive count                                      | TCP keepalive 횟수 설정                                           | nil                                        |
+| POSTGRESQL_STATEMENT_TIMEOUT        | Set the SQL statement timeout                                    | SQL 문 타임아웃 설정                                              | nil                                        |
+| POSTGRESQL_PGHBA_REMOVE_FILTERS     | Comma-separated list of strings for removing pg_hba.conf lines (example: md5, local) | pg_hba.conf 라인을 제거하기 위한 쉼표로 구분된 문자열 목록 (예: md5, local) | nil                                        |
+| POSTGRESQL_USERNAME_CONNECTION_LIMIT| Set the user connection limit                                    | 사용자 연결 제한 설정                                             | nil                                        |
+| POSTGRESQL_POSTGRES_CONNECTION_LIMIT| Set the postgres user connection limit                           | postgres 사용자 연결 제한 설정                                    | nil                                        |
+| POSTGRESQL_WAL_LEVEL                | Set the write-ahead log level                                    | 선행 기록 로그 수준 설정                                          | replica                                    |
+| POSTGRESQL_DEFAULT_TOAST_COMPRESSION| Set the postgres default compression                             | postgres 기본 압축 설정                                           | nil                                        |
+| POSTGRESQL_PASSWORD_ENCRYPTION      | Set the passwords encryption method                              | 비밀번호 암호화 방법 설정                                         | nil                                        |
+| POSTGRESQL_DEFAULT_TRANSACTION_ISOLATION | Set transaction isolation                                    | 트랜잭션 격리 설정                                                | nil                                        |
+| POSTGRESQL_AUTOCTL_CONF_DIR         | Path to the configuration dir for the pg_autoctl command         | pg_autoctl 명령어의 구성 디렉토리 경로                            | ${POSTGRESQL_AUTOCTL_VOLUME_DIR}/.config   |
+| POSTGRESQL_AUTOCTL_MODE             | pgAutoFailover node type, valid values [monitor, postgres]       | pgAutoFailover 노드 유형, 유효한 값 [monitor, postgres]           | postgres                                   |
+| POSTGRESQL_AUTOCTL_MONITOR_HOST     | Hostname for the monitor component                               | 모니터 구성 요소의 호스트 이름                                    | monitor                                    |
+| POSTGRESQL_AUTOCTL_HOSTNAME         | Hostname by which postgres is reachable                          | postgres에 접근 가능한 호스트 이름                                | $(hostname --fqdn)                         |
+
+#### docker-compose.yml
 ```YAML
 version: '3.8'
 services:

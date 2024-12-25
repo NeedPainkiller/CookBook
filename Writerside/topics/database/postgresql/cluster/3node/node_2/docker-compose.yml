@@ -7,8 +7,6 @@ services:
       service: postgres-common
     container_name: pg-2
     hostname: pg-2
-    volumes:
-      - ./data:/bitnami/postgresql
     environment:
       REPMGR_NODE_NAME: pg-node-2
       REPMGR_NODE_NETWORK_NAME: pg-node-2
@@ -24,7 +22,3 @@ services:
       PGPOOL_WD_PORT: 9000
     depends_on:
       - pg-2
-
-#volumes:
-#  pg_2_data:
-#    driver: local

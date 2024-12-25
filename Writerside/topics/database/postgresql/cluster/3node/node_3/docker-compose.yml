@@ -7,8 +7,6 @@ services:
       service: postgres-common
     container_name: pg-3
     hostname: pg-3
-    volumes:
-      - ./data:/bitnami/postgresql
     environment:
       REPMGR_NODE_NAME: pg-node-3
       REPMGR_NODE_NETWORK_NAME: pg-node-3
@@ -24,7 +22,3 @@ services:
       PGPOOL_WD_PORT: 9000
     depends_on:
       - pg-3
-
-#volumes:
-#  pg_3_data:
-#    driver: local
