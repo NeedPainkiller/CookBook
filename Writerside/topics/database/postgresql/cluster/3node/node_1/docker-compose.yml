@@ -17,8 +17,5 @@ services:
       service: pgpool-common
     container_name: pgpool-1
     hostname: pgpool-1
-    environment:
-      PGPOOL_WD_HOSTNAME: pg-node-1
-      PGPOOL_WD_PORT: 9000
     depends_on:
       - pg-1
